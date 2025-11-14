@@ -12,25 +12,29 @@ Simple, offline-capable invoice manager. Works on any device - **no downloads re
 
 ---
 
-## 🚀 Quick Deploy to GitHub Pages
+## 🚀 Quick Deploy with GitHub Actions (Recommended)
 
-### Step 1: Enable GitHub Pages
+**Automatic deployment on every push!**
+
+### Step 1: Enable GitHub Actions
 1. Go to: https://github.com/shevymeeker/invoice-app/settings/pages
-2. Under "Source", select:
-   - Branch: `main`
-   - Folder: `/standalone`
-3. Click "Save"
+2. Under "Build and deployment" → Source: Select **"GitHub Actions"**
 
-### Step 2: Wait 1-2 minutes
-Your app will be live at: `https://shevymeeker.github.io/invoice-app/standalone/`
-
-### Step 3: Share with clients!
-```
-Use our invoice app: https://shevymeeker.github.io/invoice-app/standalone/
-Works on any device - no downloads needed!
+### Step 2: Push the workflow file
+```bash
+git add .github/workflows/deploy.yml
+git commit -m "Add auto-deploy workflow"
+git push origin main
 ```
 
-📖 **Full deployment guide:** See [DEPLOY.md](DEPLOY.md)
+### Step 3: Your app deploys automatically!
+Live at: `https://shevymeeker.github.io/invoice-app/`
+
+Every time you push to `main`, it automatically deploys. Track deployments in the Actions tab.
+
+📖 **Full guides:**
+- [GITHUB_ACTIONS_DEPLOY.md](GITHUB_ACTIONS_DEPLOY.md) - Auto-deploy setup (recommended)
+- [DEPLOY.md](DEPLOY.md) - Manual deployment & other hosting options
 
 ---
 

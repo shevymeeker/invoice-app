@@ -2,6 +2,23 @@
 
 Deploy your invoice app for **FREE** in 5 minutes! No downloads required for you or your clients.
 
+## ⭐ Recommended: GitHub Actions (Auto-Deploy)
+
+**Easiest option:** Automatically deploy on every push!
+
+📖 **See [GITHUB_ACTIONS_DEPLOY.md](GITHUB_ACTIONS_DEPLOY.md)** for full guide.
+
+### Quick Setup:
+1. Settings → Pages → Source: **"GitHub Actions"**
+2. Push the workflow file (already created in `.github/workflows/deploy.yml`)
+3. Done! Every push to `main` automatically deploys.
+
+---
+
+## Alternative: Manual GitHub Pages Setup
+
+If you prefer manual control instead of automatic deployment:
+
 ## Quick Deploy (3 Steps)
 
 ### Step 1: Push Your Code to GitHub
