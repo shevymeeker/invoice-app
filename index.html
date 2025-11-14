@@ -129,6 +129,7 @@
             <div class="panel-body">
                 <form id="invoice-form">
                     <div class="form-group"><label>Client:</label><select id="invoice-client" required><option value="">-- Select Client --</option></select></div>
+                    <div class="form-group"><label>Due Date:</label><input type="date" id="invoice-due-date"></div>
                     <div class="invoice-items">
                         <h3>Line Items</h3>
                         <div id="items-container"></div>
@@ -485,6 +486,7 @@
                 items: estimate.items,
                 total: estimate.total,
                 createdAt: new Date().toISOString(),
+                dueDate: null,
                 status: 'draft'
             };
             const invoiceId = await addInvoice(invoice);
@@ -533,6 +535,8 @@
             e.preventDefault();
             const clientId = parseInt(document.getElementById('invoice-client').value);
             if (!clientId) { alert('Select a client'); return; }
+            const dueDateInput = document.getElementById('invoice-due-date').value;
+            const dueDate = dueDateInput ? new Date(dueDateInput).toISOString() : null;
             const items = [];
             document.querySelectorAll('#items-container .item-row').forEach(row => {
                 items.push({
@@ -543,7 +547,7 @@
             });
             if (items.length === 0) { alert('Add at least one item'); return; }
             const total = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
-            const invoice = { clientId, estimateId: null, items, total, createdAt: new Date().toISOString(), status: 'draft' };
+            const invoice = { clientId, estimateId: null, items, total, createdAt: new Date().toISOString(), dueDate, status: 'draft' };
             const invoiceId = await addInvoice(invoice);
             await generatePDF(invoice, invoiceId);
             e.target.reset();
@@ -621,6 +625,9 @@
             doc.text('EIN: 93-2058075', 20, 64);
             doc.text(`Invoice #: ${invoiceId}`, 140, 40);
             doc.text(`Date: ${new Date(invoice.createdAt).toLocaleDateString()}`, 140, 46);
+            if (invoice.dueDate) {
+                doc.text(`Due Date: ${new Date(invoice.dueDate).toLocaleDateString()}`, 140, 52);
+            }
             doc.setFontSize(12);
             doc.text('Bill To:', 20, 80);
             doc.setFontSize(10);
@@ -649,6 +656,21 @@
             doc.setFontSize(12);
             doc.text('TOTAL:', 140, y);
             doc.text('$' + invoice.total.toFixed(2), 170, y);
+            y += 15;
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'bold');
+            doc.text('Payment Methods:', 20, y);
+            doc.setFont(undefined, 'normal');
+            y += 6;
+            doc.text('Cash (Preferred)', 20, y);
+            y += 6;
+            doc.text('Cash App', 20, y);
+            y += 6;
+            doc.text('Venmo', 20, y);
+            y += 15;
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'italic');
+            doc.text('Thank you for your business!', 105, y, { align: 'center' });
             doc.save(`invoice-${invoiceId}.pdf`);
         }
 
