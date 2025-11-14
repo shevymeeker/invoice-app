@@ -4,7 +4,7 @@
  */
 
 export const DB_NAME = 'InvoiceAppDB';
-export const DB_VERSION = 1;
+export const DB_VERSION = 2;
 
 /**
  * Database structure definition
@@ -68,6 +68,7 @@ export const SCHEMA = {
       items: 'array of { description, quantity, price }',
       total: 'number',
       createdAt: 'timestamp',
+      dueDate: 'timestamp (optional)',
       status: 'string (draft|sent|paid)',
     },
   },
