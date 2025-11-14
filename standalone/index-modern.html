@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Owensboro Mowing Company - Invoice Manager</title>
+    <title>Owensboro Mowing Company - Invoice App</title>
 
     <!-- PWA Configuration -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#5a5a5a">
+    <meta name="theme-color" content="#2d3748">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="OMC Invoices">
 
     <!-- jsPDF for PDF generation -->
@@ -23,167 +23,167 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #d4d0c8;
-            font-size: 12px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding-bottom: 80px;
         }
 
         .header {
-            background: #5a5a5a;
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
             color: white;
-            padding: 10px 15px;
-            border-bottom: 1px solid #333;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .header h1 {
-            font-size: 16px;
-            font-weight: normal;
+            font-size: 24px;
+            margin-bottom: 5px;
         }
 
         .header p {
-            font-size: 11px;
-            color: #ddd;
-            margin-top: 2px;
+            font-size: 14px;
+            opacity: 0.9;
         }
 
         /* Tab Navigation */
         .tabs {
             display: flex;
-            background: #f0f0f0;
-            border-bottom: 1px solid #999;
-            padding-left: 5px;
+            background: white;
+            border-bottom: 2px solid #e0e0e0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .tab {
-            padding: 6px 20px;
+            flex: 1;
+            padding: 15px;
+            text-align: center;
             cursor: pointer;
-            border: 1px solid #999;
-            border-bottom: none;
-            background: #e0e0e0;
-            font-size: 12px;
-            color: #000;
-            margin-right: 2px;
-            margin-top: 3px;
+            border: none;
+            background: white;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.3s;
         }
 
         .tab.active {
-            background: #ffffff;
-            margin-bottom: -1px;
-            padding-bottom: 7px;
+            color: #10b981;
+            border-bottom: 3px solid #10b981;
+            font-weight: 600;
         }
 
-        .tab:hover:not(.active) {
-            background: #f5f5f5;
+        .tab:hover {
+            background: #f8f9fa;
         }
 
         /* Tab Content */
         .tab-content {
             display: none;
-            padding: 12px;
-            background: white;
-            border: 1px solid #999;
-            border-top: none;
-            margin: 0 5px;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         .tab-content.active {
             display: block;
         }
 
-        /* Panels */
-        .panel {
-            border: 1px solid #999;
-            margin-bottom: 10px;
-            background: #f8f8f8;
-        }
-
-        .panel-header {
-            background: linear-gradient(to bottom, #e8e8e8 0%, #d0d0d0 100%);
-            padding: 6px 10px;
-            border-bottom: 1px solid #999;
-            font-weight: bold;
-            font-size: 12px;
-        }
-
-        .panel-body {
-            padding: 10px;
+        /* Cards */
+        .card {
             background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #333;
         }
 
         /* Forms */
         .form-group {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 3px;
-            font-size: 11px;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
         }
 
         .form-group input,
         .form-group select,
         .form-group textarea {
             width: 100%;
-            padding: 3px 5px;
-            border: 1px solid #7f7f7f;
-            font-size: 11px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
         }
 
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
-            outline: 1px solid #10b981;
+            outline: none;
+            border-color: #10b981;
         }
 
         /* Buttons */
         .btn {
-            padding: 4px 12px;
-            border: 1px solid #7f7f7f;
-            font-size: 11px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
-            background: linear-gradient(to bottom, #f0f0f0 0%, #e0e0e0 100%);
-            color: #000;
-        }
-
-        .btn:hover {
-            background: linear-gradient(to bottom, #e8e8e8 0%, #d0d0d0 100%);
-        }
-
-        .btn:active {
-            background: linear-gradient(to bottom, #d0d0d0 0%, #e0e0e0 100%);
+            transition: all 0.3s;
         }
 
         .btn-primary {
-            background: linear-gradient(to bottom, #28a745 0%, #218838 100%);
+            background: #10b981;
             color: white;
-            border-color: #1e7e34;
         }
 
         .btn-primary:hover {
-            background: linear-gradient(to bottom, #218838 0%, #1e7e34 100%);
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
         }
 
         .btn-orange {
-            background: linear-gradient(to bottom, #fd7e14 0%, #f85a00 100%);
+            background: #f97316;
             color: white;
-            border-color: #dc6200;
         }
 
         .btn-orange:hover {
-            background: linear-gradient(to bottom, #f85a00 0%, #dc6200 100%);
+            background: #ea580c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
         }
 
         .btn-danger {
-            background: linear-gradient(to bottom, #dc3545 0%, #c82333 100%);
+            background: #ef4444;
             color: white;
-            border-color: #bd2130;
         }
 
         .btn-small {
-            padding: 2px 8px;
-            font-size: 10px;
+            padding: 6px 12px;
+            font-size: 12px;
         }
 
         /* Lists */
@@ -192,17 +192,14 @@
         }
 
         .list-item {
-            background: #f8f8f8;
-            padding: 8px;
-            margin-bottom: 2px;
-            border: 1px solid #ccc;
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-
-        .list-item:nth-child(even) {
-            background: #ffffff;
         }
 
         .list-item-content {
@@ -210,203 +207,228 @@
         }
 
         .list-item-content h3 {
-            font-size: 12px;
-            margin-bottom: 2px;
-            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+            color: #333;
         }
 
         .list-item-content p {
-            font-size: 10px;
-            color: #555;
+            font-size: 14px;
+            color: #666;
         }
 
         .list-item-actions {
             display: flex;
-            gap: 4px;
+            gap: 8px;
         }
 
-        /* Invoice Items */
+        /* Invoice Items Table */
         .invoice-items {
-            margin-top: 12px;
-        }
-
-        .invoice-items h3 {
-            font-size: 11px;
-            margin-bottom: 6px;
-            font-weight: bold;
+            margin-top: 20px;
         }
 
         .item-row {
             display: grid;
-            grid-template-columns: 2fr 80px 80px 80px 60px;
-            gap: 4px;
-            margin-bottom: 4px;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: end;
         }
 
         .item-row input {
-            padding: 3px;
-            border: 1px solid #7f7f7f;
-            font-size: 10px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
 
         .total-section {
-            background: #f0f0f0;
-            border: 1px solid #999;
-            padding: 8px;
-            margin-top: 12px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
             text-align: right;
         }
 
         .total-section h3 {
-            font-size: 13px;
-            font-weight: bold;
+            font-size: 20px;
+            color: #333;
         }
 
         /* Empty State */
         .empty-state {
             text-align: center;
-            padding: 25px;
-            color: #666;
-            font-size: 11px;
+            padding: 40px;
+            color: #999;
         }
 
-        /* Mobile */
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        /* Hide class */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Mobile Responsive */
         @media (max-width: 600px) {
             .item-row {
                 grid-template-columns: 1fr;
+            }
+
+            .list-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .list-item-actions {
+                margin-top: 10px;
+                width: 100%;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Header -->
     <div class="header">
-        <h1>Owensboro Mowing Company - Invoice Manager</h1>
-        <p>Owensboro, Kentucky 42303</p>
+        <h1>🏡 Owensboro Mowing Company</h1>
+        <p>Invoice Management System</p>
     </div>
 
+    <!-- Tab Navigation -->
     <div class="tabs">
-        <button class="tab active" onclick="switchTab('clients')">Clients</button>
-        <button class="tab" onclick="switchTab('invoices')">Invoices</button>
-        <button class="tab" onclick="switchTab('settings')">Settings</button>
+        <button class="tab active" onclick="switchTab('clients')">📋 Clients</button>
+        <button class="tab" onclick="switchTab('invoices')">💰 Invoices</button>
+        <button class="tab" onclick="switchTab('settings')">⚙️ Settings</button>
     </div>
 
     <!-- Clients Tab -->
     <div id="clients-tab" class="tab-content active">
-        <div class="panel">
-            <div class="panel-header">Add New Client</div>
-            <div class="panel-body">
-                <form id="client-form">
-                    <div class="form-group">
-                        <label>Name:</label>
-                        <input type="text" id="client-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Phone:</label>
-                        <input type="tel" id="client-phone">
-                    </div>
-                    <div class="form-group">
-                        <label>Email:</label>
-                        <input type="email" id="client-email">
-                    </div>
-                    <div class="form-group">
-                        <label>Address:</label>
-                        <textarea id="client-address" rows="2"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Add Client</button>
-                </form>
-            </div>
+        <div class="card">
+            <h2>Add New Client</h2>
+            <form id="client-form">
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="client-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" id="client-phone">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="client-email">
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <textarea id="client-address" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Client</button>
+            </form>
         </div>
 
-        <div class="panel">
-            <div class="panel-header">Client List</div>
-            <div class="panel-body">
-                <ul id="clients-list" class="list"></ul>
-            </div>
+        <div class="card">
+            <h2>My Clients</h2>
+            <ul id="clients-list" class="list"></ul>
         </div>
     </div>
 
     <!-- Invoices Tab -->
     <div id="invoices-tab" class="tab-content">
-        <div class="panel">
-            <div class="panel-header">Create Invoice</div>
-            <div class="panel-body">
-                <form id="invoice-form">
-                    <div class="form-group">
-                        <label>Client:</label>
-                        <select id="invoice-client" required>
-                            <option value="">-- Select Client --</option>
-                        </select>
-                    </div>
+        <div class="card">
+            <h2>Create New Invoice</h2>
+            <form id="invoice-form">
+                <div class="form-group">
+                    <label>Select Client *</label>
+                    <select id="invoice-client" required>
+                        <option value="">-- Select a client --</option>
+                    </select>
+                </div>
 
-                    <div class="invoice-items">
-                        <h3>Line Items</h3>
-                        <div id="items-container"></div>
-                        <button type="button" class="btn" onclick="addLineItem()">Add Item</button>
-                    </div>
+                <div class="invoice-items">
+                    <h3>Line Items</h3>
+                    <div id="items-container"></div>
+                    <button type="button" class="btn btn-secondary" onclick="addLineItem()">+ Add Item</button>
+                </div>
 
-                    <div class="total-section">
-                        <h3>Total: $<span id="invoice-total">0.00</span></h3>
-                    </div>
+                <div class="total-section">
+                    <h3>Total: $<span id="invoice-total">0.00</span></h3>
+                </div>
 
-                    <div style="margin-top: 10px;">
-                        <button type="submit" class="btn btn-orange">Create Invoice & Generate PDF</button>
-                    </div>
-                </form>
-            </div>
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-primary">Create Invoice</button>
+                </div>
+            </form>
         </div>
 
-        <div class="panel">
-            <div class="panel-header">Invoice History</div>
-            <div class="panel-body">
-                <ul id="invoices-list" class="list"></ul>
-            </div>
+        <div class="card">
+            <h2>Recent Invoices</h2>
+            <ul id="invoices-list" class="list"></ul>
         </div>
     </div>
 
     <!-- Settings Tab -->
     <div id="settings-tab" class="tab-content">
-        <div class="panel">
-            <div class="panel-header">Business Information</div>
-            <div class="panel-body">
-                <table style="width: 100%; font-size: 11px;">
-                    <tr><td style="padding: 4px 0;"><b>Business Name:</b></td><td>Owensboro Mowing Company</td></tr>
-                    <tr><td style="padding: 4px 0;"><b>Address:</b></td><td>Owensboro, Kentucky 42303</td></tr>
-                    <tr><td style="padding: 4px 0;"><b>Phone:</b></td><td>270.222.9613 or 270.499.7758</td></tr>
-                    <tr><td style="padding: 4px 0;"><b>Website:</b></td><td>owensboromowingcompany.com</td></tr>
-                    <tr><td style="padding: 4px 0;"><b>EIN:</b></td><td>93-2058075</td></tr>
-                </table>
+        <div class="card">
+            <h2>Business Information</h2>
+            <div class="form-group">
+                <label>Business Name</label>
+                <p style="padding: 10px; background: #f8f9fa; border-radius: 6px;">Owensboro Mowing Company</p>
+            </div>
+            <div class="form-group">
+                <label>Address</label>
+                <p style="padding: 10px; background: #f8f9fa; border-radius: 6px;">Owensboro, Kentucky 42303</p>
+            </div>
+            <div class="form-group">
+                <label>Phone</label>
+                <p style="padding: 10px; background: #f8f9fa; border-radius: 6px;">270.222.9613 or 270.499.7758</p>
+            </div>
+            <div class="form-group">
+                <label>Website</label>
+                <p style="padding: 10px; background: #f8f9fa; border-radius: 6px;">owensboromowingcompany.com</p>
+            </div>
+            <div class="form-group">
+                <label>EIN</label>
+                <p style="padding: 10px; background: #f8f9fa; border-radius: 6px;">93-2058075</p>
             </div>
         </div>
 
-        <div class="panel">
-            <div class="panel-header">Data Management</div>
-            <div class="panel-body">
-                <button class="btn" onclick="exportData()">Export All Data</button>
-                <button class="btn" onclick="document.getElementById('import-file').click()">Import Data</button>
+        <div class="card">
+            <h2>Data Management</h2>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button class="btn btn-secondary" onclick="exportData()">📥 Export All Data</button>
+                <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">📤 Import Data</button>
                 <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importData(event)">
-                <button class="btn btn-danger" onclick="clearAllData()">Clear All Data</button>
+                <button class="btn btn-danger" onclick="clearAllData()">🗑️ Clear All Data</button>
             </div>
         </div>
     </div>
 
     <script>
+        // IndexedDB Setup
         const DB_NAME = 'InvoiceAppDB';
         const DB_VERSION = 1;
         let db;
 
+        // Initialize Database
         function initDB() {
             return new Promise((resolve, reject) => {
                 const request = indexedDB.open(DB_NAME, DB_VERSION);
+
                 request.onerror = () => reject(request.error);
                 request.onsuccess = () => {
                     db = request.result;
                     resolve(db);
                 };
+
                 request.onupgradeneeded = (event) => {
                     const db = event.target.result;
+
                     if (!db.objectStoreNames.contains('clients')) {
                         db.createObjectStore('clients', { keyPath: 'id', autoIncrement: true });
                     }
+
                     if (!db.objectStoreNames.contains('invoices')) {
                         const invoiceStore = db.createObjectStore('invoices', { keyPath: 'id', autoIncrement: true });
                         invoiceStore.createIndex('clientId', 'clientId', { unique: false });
@@ -415,16 +437,19 @@
             });
         }
 
+        // Helper function for transactions
         function performTransaction(storeName, mode, operation) {
             return new Promise((resolve, reject) => {
                 const transaction = db.transaction(storeName, mode);
                 const store = transaction.objectStore(storeName);
                 const request = operation(store);
+
                 request.onsuccess = () => resolve(request.result);
                 request.onerror = () => reject(request.error);
             });
         }
 
+        // Client Operations
         async function addClient(client) {
             return performTransaction('clients', 'readwrite', store => store.add(client));
         }
@@ -437,6 +462,7 @@
             return performTransaction('clients', 'readwrite', store => store.delete(id));
         }
 
+        // Invoice Operations
         async function addInvoice(invoice) {
             return performTransaction('invoices', 'readwrite', store => store.add(invoice));
         }
@@ -449,11 +475,17 @@
             return performTransaction('invoices', 'readwrite', store => store.delete(id));
         }
 
+        // Tab Switching
         function switchTab(tabName) {
+            // Remove active from all tabs and contents
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            // Add active to selected
             event.target.classList.add('active');
             document.getElementById(tabName + '-tab').classList.add('active');
+
+            // Refresh data
             if (tabName === 'clients') loadClients();
             if (tabName === 'invoices') {
                 loadInvoices();
@@ -461,8 +493,10 @@
             }
         }
 
+        // Client Form Submission
         document.getElementById('client-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+
             const client = {
                 name: document.getElementById('client-name').value,
                 phone: document.getElementById('client-phone').value,
@@ -470,24 +504,28 @@
                 address: document.getElementById('client-address').value,
                 createdAt: new Date().toISOString()
             };
+
             await addClient(client);
             e.target.reset();
             loadClients();
-            alert('Client added.');
+            alert('Client added successfully!');
         });
 
+        // Load and Display Clients
         async function loadClients() {
             const clients = await getAllClients();
             const list = document.getElementById('clients-list');
+
             if (clients.length === 0) {
-                list.innerHTML = '<div class="empty-state">No clients. Add a client above.</div>';
+                list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><p>No clients yet. Add your first client above!</p></div>';
                 return;
             }
+
             list.innerHTML = clients.map(client => `
                 <li class="list-item">
                     <div class="list-item-content">
                         <h3>${client.name}</h3>
-                        <p>${client.phone || 'No phone'} | ${client.email || 'No email'}</p>
+                        <p>${client.phone || 'No phone'} • ${client.email || 'No email'}</p>
                         ${client.address ? `<p>${client.address}</p>` : ''}
                     </div>
                     <div class="list-item-actions">
@@ -498,19 +536,22 @@
         }
 
         async function removeClient(id) {
-            if (confirm('Delete this client?')) {
+            if (confirm('Are you sure you want to delete this client?')) {
                 await deleteClient(id);
                 loadClients();
             }
         }
 
+        // Load clients into invoice select
         async function loadClientSelect() {
             const clients = await getAllClients();
             const select = document.getElementById('invoice-client');
-            select.innerHTML = '<option value="">-- Select Client --</option>' +
+
+            select.innerHTML = '<option value="">-- Select a client --</option>' +
                 clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
         }
 
+        // Line Items Management
         let itemCount = 0;
 
         function addLineItem() {
@@ -524,9 +565,12 @@
                 <input type="number" placeholder="Qty" class="item-qty" value="1" min="1" required>
                 <input type="number" placeholder="Price" class="item-price" value="0" step="0.01" min="0" required>
                 <input type="text" class="item-total" value="$0.00" readonly>
-                <button type="button" class="btn btn-small" onclick="removeLineItem(${itemCount})">X</button>
+                <button type="button" class="btn btn-danger btn-small" onclick="removeLineItem(${itemCount})">×</button>
             `;
+
             container.appendChild(itemRow);
+
+            // Add event listeners for calculation
             itemRow.querySelector('.item-qty').addEventListener('input', calculateTotal);
             itemRow.querySelector('.item-price').addEventListener('input', calculateTotal);
         }
@@ -542,19 +586,24 @@
                 const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
                 const price = parseFloat(row.querySelector('.item-price').value) || 0;
                 const itemTotal = qty * price;
+
                 row.querySelector('.item-total').value = '$' + itemTotal.toFixed(2);
                 total += itemTotal;
             });
+
             document.getElementById('invoice-total').textContent = total.toFixed(2);
         }
 
+        // Invoice Form Submission
         document.getElementById('invoice-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+
             const clientId = parseInt(document.getElementById('invoice-client').value);
             if (!clientId) {
-                alert('Select a client');
+                alert('Please select a client');
                 return;
             }
+
             const items = [];
             document.querySelectorAll('.item-row').forEach(row => {
                 items.push({
@@ -563,11 +612,14 @@
                     price: parseFloat(row.querySelector('.item-price').value)
                 });
             });
+
             if (items.length === 0) {
-                alert('Add at least one item');
+                alert('Please add at least one item');
                 return;
             }
+
             const total = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+
             const invoice = {
                 clientId,
                 items,
@@ -575,32 +627,42 @@
                 createdAt: new Date().toISOString(),
                 status: 'draft'
             };
+
             const invoiceId = await addInvoice(invoice);
+
+            // Generate PDF
             await generatePDF(invoice, invoiceId);
+
+            // Reset form
             e.target.reset();
             document.getElementById('items-container').innerHTML = '';
             itemCount = 0;
             calculateTotal();
+
             loadInvoices();
             alert('Invoice created and PDF generated!');
         });
 
+        // Load and Display Invoices
         async function loadInvoices() {
             const invoices = await getAllInvoices();
             const clients = await getAllClients();
             const list = document.getElementById('invoices-list');
+
             if (invoices.length === 0) {
-                list.innerHTML = '<div class="empty-state">No invoices. Create an invoice above.</div>';
+                list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💰</div><p>No invoices yet. Create your first invoice above!</p></div>';
                 return;
             }
+
             list.innerHTML = invoices.map(invoice => {
                 const client = clients.find(c => c.id === invoice.clientId);
                 const date = new Date(invoice.createdAt).toLocaleDateString();
+
                 return `
                     <li class="list-item">
                         <div class="list-item-content">
-                            <h3>${client ? client.name : 'Unknown'}</h3>
-                            <p>${date} | ${invoice.items.length} items | $${invoice.total.toFixed(2)}</p>
+                            <h3>${client ? client.name : 'Unknown Client'}</h3>
+                            <p>Date: ${date} • Items: ${invoice.items.length} • Total: $${invoice.total.toFixed(2)}</p>
                         </div>
                         <div class="list-item-actions">
                             <button class="btn btn-primary btn-small" onclick="viewInvoice(${invoice.id})">View PDF</button>
@@ -612,7 +674,7 @@
         }
 
         async function removeInvoice(id) {
-            if (confirm('Delete this invoice?')) {
+            if (confirm('Are you sure you want to delete this invoice?')) {
                 await deleteInvoice(id);
                 loadInvoices();
             }
@@ -621,25 +683,36 @@
         async function viewInvoice(id) {
             const invoices = await getAllInvoices();
             const invoice = invoices.find(inv => inv.id === id);
-            if (invoice) await generatePDF(invoice, id);
+            if (invoice) {
+                await generatePDF(invoice, id);
+            }
         }
 
+        // PDF Generation
         async function generatePDF(invoice, invoiceId) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+
             const clients = await getAllClients();
             const client = clients.find(c => c.id === invoice.clientId);
 
+            // Header
             doc.setFontSize(20);
             doc.text('INVOICE', 105, 20, { align: 'center' });
+
+            // Business Info
             doc.setFontSize(10);
             doc.text('Owensboro Mowing Company', 20, 40);
             doc.text('Owensboro, Kentucky 42303', 20, 46);
             doc.text('270.222.9613 or 270.499.7758', 20, 52);
             doc.text('owensboromowingcompany.com', 20, 58);
             doc.text('EIN: 93-2058075', 20, 64);
+
+            // Invoice Info
             doc.text(`Invoice #: ${invoiceId}`, 140, 40);
             doc.text(`Date: ${new Date(invoice.createdAt).toLocaleDateString()}`, 140, 46);
+
+            // Client Info
             doc.setFontSize(12);
             doc.text('Bill To:', 20, 80);
             doc.setFontSize(10);
@@ -649,14 +722,18 @@
                 if (client.phone) doc.text(client.phone, 20, 100);
                 if (client.email) doc.text(client.email, 20, 106);
             }
+
+            // Items Table
             let y = 120;
             doc.setFontSize(10);
             doc.text('Description', 20, y);
             doc.text('Qty', 120, y);
             doc.text('Price', 145, y);
             doc.text('Total', 170, y);
+
             doc.line(20, y + 2, 190, y + 2);
             y += 10;
+
             invoice.items.forEach(item => {
                 doc.text(item.description, 20, y);
                 doc.text(item.quantity.toString(), 120, y);
@@ -664,28 +741,35 @@
                 doc.text('$' + (item.quantity * item.price).toFixed(2), 170, y);
                 y += 8;
             });
+
+            // Total
             doc.line(20, y, 190, y);
             y += 10;
             doc.setFontSize(12);
             doc.text('TOTAL:', 140, y);
             doc.text('$' + invoice.total.toFixed(2), 170, y);
+
+            // Save or open
             doc.save(`invoice-${invoiceId}.pdf`);
         }
 
+        // Data Export/Import
         async function exportData() {
             const clients = await getAllClients();
             const invoices = await getAllInvoices();
+
             const data = {
                 version: 1,
                 exportDate: new Date().toISOString(),
                 clients,
                 invoices
             };
+
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `invoice-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `invoice-app-backup-${new Date().toISOString().split('T')[0]}.json`;
             a.click();
             URL.revokeObjectURL(url);
         }
@@ -693,52 +777,74 @@
         async function importData(event) {
             const file = event.target.files[0];
             if (!file) return;
+
             const reader = new FileReader();
             reader.onload = async (e) => {
                 try {
                     const data = JSON.parse(e.target.result);
-                    if (confirm('This will replace all data. Continue?')) {
+
+                    if (confirm('This will replace all existing data. Continue?')) {
+                        // Clear existing data
                         const clientTx = db.transaction('clients', 'readwrite');
                         await clientTx.objectStore('clients').clear();
+
                         const invoiceTx = db.transaction('invoices', 'readwrite');
                         await invoiceTx.objectStore('invoices').clear();
-                        for (const client of data.clients) await addClient(client);
-                        for (const invoice of data.invoices) await addInvoice(invoice);
-                        alert('Data imported!');
+
+                        // Import new data
+                        for (const client of data.clients) {
+                            await addClient(client);
+                        }
+                        for (const invoice of data.invoices) {
+                            await addInvoice(invoice);
+                        }
+
+                        alert('Data imported successfully!');
                         loadClients();
                         loadInvoices();
                     }
                 } catch (error) {
-                    alert('Error importing: ' + error.message);
+                    alert('Error importing data: ' + error.message);
                 }
             };
             reader.readAsText(file);
         }
 
         async function clearAllData() {
-            if (confirm('Delete ALL data? Cannot be undone!')) {
-                const clientTx = db.transaction('clients', 'readwrite');
-                await clientTx.objectStore('clients').clear();
-                const invoiceTx = db.transaction('invoices', 'readwrite');
-                await invoiceTx.objectStore('invoices').clear();
-                alert('All data cleared!');
-                loadClients();
-                loadInvoices();
+            if (confirm('Are you sure you want to delete ALL data? This cannot be undone!')) {
+                if (confirm('Really sure? This will delete all clients and invoices!')) {
+                    const clientTx = db.transaction('clients', 'readwrite');
+                    await clientTx.objectStore('clients').clear();
+
+                    const invoiceTx = db.transaction('invoices', 'readwrite');
+                    await invoiceTx.objectStore('invoices').clear();
+
+                    alert('All data cleared!');
+                    loadClients();
+                    loadInvoices();
+                }
             }
         }
 
+        // Initialize App
         async function initApp() {
             await initDB();
             loadClients();
             loadInvoices();
             loadClientSelect();
+
+            // Add first line item
             addLineItem();
         }
 
+        // Start app when page loads
         window.addEventListener('load', initApp);
 
+        // Register service worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('service-worker.js');
+            navigator.serviceWorker.register('service-worker.js')
+                .then(reg => console.log('Service Worker registered'))
+                .catch(err => console.log('Service Worker registration failed'));
         }
     </script>
 </body>
