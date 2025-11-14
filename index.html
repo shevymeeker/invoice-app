@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owensboro Mowing Company - Invoice Manager</title>
+
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#5a5a5a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="OMC Invoices">
+
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #d4d0c8;
+            font-size: 12px;
+        }
+
+        .header {
+            background: #5a5a5a;
+            color: white;
+            padding: 10px 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        .header h1 {
+            font-size: 16px;
+            font-weight: normal;
+        }
+
+        .header p {
+            font-size: 11px;
+            color: #ddd;
+            margin-top: 2px;
+        }
+
+        /* Tab Navigation */
+        .tabs {
+            display: flex;
+            background: #f0f0f0;
+            border-bottom: 1px solid #999;
+            padding-left: 5px;
+        }
+
+        .tab {
+            padding: 6px 20px;
+            cursor: pointer;
+            border: 1px solid #999;
+            border-bottom: none;
+            background: #e0e0e0;
+            font-size: 12px;
+            color: #000;
+            margin-right: 2px;
+            margin-top: 3px;
+        }
+
+        .tab.active {
+            background: #ffffff;
+            margin-bottom: -1px;
+            padding-bottom: 7px;
+        }
+
+        .tab:hover:not(.active) {
+            background: #f5f5f5;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            padding: 12px;
+            background: white;
+            border: 1px solid #999;
+            border-top: none;
+            margin: 0 5px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Panels */
+        .panel {
+            border: 1px solid #999;
+            margin-bottom: 10px;
+            background: #f8f8f8;
+        }
+
+        .panel-header {
+            background: linear-gradient(to bottom, #e8e8e8 0%, #d0d0d0 100%);
+            padding: 6px 10px;
+            border-bottom: 1px solid #999;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .panel-body {
+            padding: 10px;
+            background: white;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 11px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 3px 5px;
+            border: 1px solid #7f7f7f;
+            font-size: 11px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: 1px solid #10b981;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 4px 12px;
+            border: 1px solid #7f7f7f;
+            font-size: 11px;
+            cursor: pointer;
+            background: linear-gradient(to bottom, #f0f0f0 0%, #e0e0e0 100%);
+            color: #000;
+        }
+
+        .btn:hover {
+            background: linear-gradient(to bottom, #e8e8e8 0%, #d0d0d0 100%);
+        }
+
+        .btn:active {
+            background: linear-gradient(to bottom, #d0d0d0 0%, #e0e0e0 100%);
+        }
+
+        .btn-primary {
+            background: linear-gradient(to bottom, #28a745 0%, #218838 100%);
+            color: white;
+            border-color: #1e7e34;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to bottom, #218838 0%, #1e7e34 100%);
+        }
+
+        .btn-orange {
+            background: linear-gradient(to bottom, #fd7e14 0%, #f85a00 100%);
+            color: white;
+            border-color: #dc6200;
+        }
+
+        .btn-orange:hover {
+            background: linear-gradient(to bottom, #f85a00 0%, #dc6200 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(to bottom, #dc3545 0%, #c82333 100%);
+            color: white;
+            border-color: #bd2130;
+        }
+
+        .btn-small {
+            padding: 2px 8px;
+            font-size: 10px;
+        }
+
+        /* Lists */
+        .list {
+            list-style: none;
+        }
+
+        .list-item {
+            background: #f8f8f8;
+            padding: 8px;
+            margin-bottom: 2px;
+            border: 1px solid #ccc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-item:nth-child(even) {
+            background: #ffffff;
+        }
+
+        .list-item-content {
+            flex: 1;
+        }
+
+        .list-item-content h3 {
+            font-size: 12px;
+            margin-bottom: 2px;
+            font-weight: bold;
+        }
+
+        .list-item-content p {
+            font-size: 10px;
+            color: #555;
+        }
+
+        .list-item-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        /* Invoice Items */
+        .invoice-items {
+            margin-top: 12px;
+        }
+
+        .invoice-items h3 {
+            font-size: 11px;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 2fr 80px 80px 80px 60px;
+            gap: 4px;
+            margin-bottom: 4px;
+        }
+
+        .item-row input {
+            padding: 3px;
+            border: 1px solid #7f7f7f;
+            font-size: 10px;
+        }
+
+        .total-section {
+            background: #f0f0f0;
+            border: 1px solid #999;
+            padding: 8px;
+            margin-top: 12px;
+            text-align: right;
+        }
+
+        .total-section h3 {
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 25px;
+            color: #666;
+            font-size: 11px;
+        }
+
+        /* Mobile */
+        @media (max-width: 600px) {
+            .item-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Owensboro Mowing Company - Invoice Manager</h1>
+        <p>Owensboro, Kentucky 42303</p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('clients')">Clients</button>
+        <button class="tab" onclick="switchTab('invoices')">Invoices</button>
+        <button class="tab" onclick="switchTab('settings')">Settings</button>
+    </div>
+
+    <!-- Clients Tab -->
+    <div id="clients-tab" class="tab-content active">
+        <div class="panel">
+            <div class="panel-header">Add New Client</div>
+            <div class="panel-body">
+                <form id="client-form">
+                    <div class="form-group">
+                        <label>Name:</label>
+                        <input type="text" id="client-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone:</label>
+                        <input type="tel" id="client-phone">
+                    </div>
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input type="email" id="client-email">
+                    </div>
+                    <div class="form-group">
+                        <label>Address:</label>
+                        <textarea id="client-address" rows="2"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Client</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">Client List</div>
+            <div class="panel-body">
+                <ul id="clients-list" class="list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoices Tab -->
+    <div id="invoices-tab" class="tab-content">
+        <div class="panel">
+            <div class="panel-header">Create Invoice</div>
+            <div class="panel-body">
+                <form id="invoice-form">
+                    <div class="form-group">
+                        <label>Client:</label>
+                        <select id="invoice-client" required>
+                            <option value="">-- Select Client --</option>
+                        </select>
+                    </div>
+
+                    <div class="invoice-items">
+                        <h3>Line Items</h3>
+                        <div id="items-container"></div>
+                        <button type="button" class="btn" onclick="addLineItem()">Add Item</button>
+                    </div>
+
+                    <div class="total-section">
+                        <h3>Total: $<span id="invoice-total">0.00</span></h3>
+                    </div>
+
+                    <div style="margin-top: 10px;">
+                        <button type="submit" class="btn btn-orange">Create Invoice & Generate PDF</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">Invoice History</div>
+            <div class="panel-body">
+                <ul id="invoices-list" class="list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div id="settings-tab" class="tab-content">
+        <div class="panel">
+            <div class="panel-header">Business Information</div>
+            <div class="panel-body">
+                <table style="width: 100%; font-size: 11px;">
+                    <tr><td style="padding: 4px 0;"><b>Business Name:</b></td><td>Owensboro Mowing Company</td></tr>
+                    <tr><td style="padding: 4px 0;"><b>Address:</b></td><td>Owensboro, Kentucky 42303</td></tr>
+                    <tr><td style="padding: 4px 0;"><b>Phone:</b></td><td>270.222.9613 or 270.499.7758</td></tr>
+                    <tr><td style="padding: 4px 0;"><b>Website:</b></td><td>owensboromowingcompany.com</td></tr>
+                    <tr><td style="padding: 4px 0;"><b>EIN:</b></td><td>93-2058075</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">Data Management</div>
+            <div class="panel-body">
+                <button class="btn" onclick="exportData()">Export All Data</button>
+                <button class="btn" onclick="document.getElementById('import-file').click()">Import Data</button>
+                <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importData(event)">
+                <button class="btn btn-danger" onclick="clearAllData()">Clear All Data</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DB_NAME = 'InvoiceAppDB';
+        const DB_VERSION = 1;
+        let db;
+
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
+                };
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains('clients')) {
+                        db.createObjectStore('clients', { keyPath: 'id', autoIncrement: true });
+                    }
+                    if (!db.objectStoreNames.contains('invoices')) {
+                        const invoiceStore = db.createObjectStore('invoices', { keyPath: 'id', autoIncrement: true });
+                        invoiceStore.createIndex('clientId', 'clientId', { unique: false });
+                    }
+                };
+            });
+        }
+
+        function performTransaction(storeName, mode, operation) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(storeName, mode);
+                const store = transaction.objectStore(storeName);
+                const request = operation(store);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function addClient(client) {
+            return performTransaction('clients', 'readwrite', store => store.add(client));
+        }
+
+        async function getAllClients() {
+            return performTransaction('clients', 'readonly', store => store.getAll());
+        }
+
+        async function deleteClient(id) {
+            return performTransaction('clients', 'readwrite', store => store.delete(id));
+        }
+
+        async function addInvoice(invoice) {
+            return performTransaction('invoices', 'readwrite', store => store.add(invoice));
+        }
+
+        async function getAllInvoices() {
+            return performTransaction('invoices', 'readonly', store => store.getAll());
+        }
+
+        async function deleteInvoice(id) {
+            return performTransaction('invoices', 'readwrite', store => store.delete(id));
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+            if (tabName === 'clients') loadClients();
+            if (tabName === 'invoices') {
+                loadInvoices();
+                loadClientSelect();
+            }
+        }
+
+        document.getElementById('client-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const client = {
+                name: document.getElementById('client-name').value,
+                phone: document.getElementById('client-phone').value,
+                email: document.getElementById('client-email').value,
+                address: document.getElementById('client-address').value,
+                createdAt: new Date().toISOString()
+            };
+            await addClient(client);
+            e.target.reset();
+            loadClients();
+            alert('Client added.');
+        });
+
+        async function loadClients() {
+            const clients = await getAllClients();
+            const list = document.getElementById('clients-list');
+            if (clients.length === 0) {
+                list.innerHTML = '<div class="empty-state">No clients. Add a client above.</div>';
+                return;
+            }
+            list.innerHTML = clients.map(client => `
+                <li class="list-item">
+                    <div class="list-item-content">
+                        <h3>${client.name}</h3>
+                        <p>${client.phone || 'No phone'} | ${client.email || 'No email'}</p>
+                        ${client.address ? `<p>${client.address}</p>` : ''}
+                    </div>
+                    <div class="list-item-actions">
+                        <button class="btn btn-danger btn-small" onclick="removeClient(${client.id})">Delete</button>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        async function removeClient(id) {
+            if (confirm('Delete this client?')) {
+                await deleteClient(id);
+                loadClients();
+            }
+        }
+
+        async function loadClientSelect() {
+            const clients = await getAllClients();
+            const select = document.getElementById('invoice-client');
+            select.innerHTML = '<option value="">-- Select Client --</option>' +
+                clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+
+        let itemCount = 0;
+
+        function addLineItem() {
+            itemCount++;
+            const container = document.getElementById('items-container');
+            const itemRow = document.createElement('div');
+            itemRow.className = 'item-row';
+            itemRow.id = 'item-' + itemCount;
+            itemRow.innerHTML = `
+                <input type="text" placeholder="Description" class="item-desc" required>
+                <input type="number" placeholder="Qty" class="item-qty" value="1" min="1" required>
+                <input type="number" placeholder="Price" class="item-price" value="0" step="0.01" min="0" required>
+                <input type="text" class="item-total" value="$0.00" readonly>
+                <button type="button" class="btn btn-small" onclick="removeLineItem(${itemCount})">X</button>
+            `;
+            container.appendChild(itemRow);
+            itemRow.querySelector('.item-qty').addEventListener('input', calculateTotal);
+            itemRow.querySelector('.item-price').addEventListener('input', calculateTotal);
+        }
+
+        function removeLineItem(id) {
+            document.getElementById('item-' + id).remove();
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            document.querySelectorAll('.item-row').forEach(row => {
+                const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+                const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                const itemTotal = qty * price;
+                row.querySelector('.item-total').value = '$' + itemTotal.toFixed(2);
+                total += itemTotal;
+            });
+            document.getElementById('invoice-total').textContent = total.toFixed(2);
+        }
+
+        document.getElementById('invoice-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const clientId = parseInt(document.getElementById('invoice-client').value);
+            if (!clientId) {
+                alert('Select a client');
+                return;
+            }
+            const items = [];
+            document.querySelectorAll('.item-row').forEach(row => {
+                items.push({
+                    description: row.querySelector('.item-desc').value,
+                    quantity: parseFloat(row.querySelector('.item-qty').value),
+                    price: parseFloat(row.querySelector('.item-price').value)
+                });
+            });
+            if (items.length === 0) {
+                alert('Add at least one item');
+                return;
+            }
+            const total = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+            const invoice = {
+                clientId,
+                items,
+                total,
+                createdAt: new Date().toISOString(),
+                status: 'draft'
+            };
+            const invoiceId = await addInvoice(invoice);
+            await generatePDF(invoice, invoiceId);
+            e.target.reset();
+            document.getElementById('items-container').innerHTML = '';
+            itemCount = 0;
+            calculateTotal();
+            loadInvoices();
+            alert('Invoice created and PDF generated!');
+        });
+
+        async function loadInvoices() {
+            const invoices = await getAllInvoices();
+            const clients = await getAllClients();
+            const list = document.getElementById('invoices-list');
+            if (invoices.length === 0) {
+                list.innerHTML = '<div class="empty-state">No invoices. Create an invoice above.</div>';
+                return;
+            }
+            list.innerHTML = invoices.map(invoice => {
+                const client = clients.find(c => c.id === invoice.clientId);
+                const date = new Date(invoice.createdAt).toLocaleDateString();
+                return `
+                    <li class="list-item">
+                        <div class="list-item-content">
+                            <h3>${client ? client.name : 'Unknown'}</h3>
+                            <p>${date} | ${invoice.items.length} items | $${invoice.total.toFixed(2)}</p>
+                        </div>
+                        <div class="list-item-actions">
+                            <button class="btn btn-primary btn-small" onclick="viewInvoice(${invoice.id})">View PDF</button>
+                            <button class="btn btn-danger btn-small" onclick="removeInvoice(${invoice.id})">Delete</button>
+                        </div>
+                    </li>
+                `;
+            }).join('');
+        }
+
+        async function removeInvoice(id) {
+            if (confirm('Delete this invoice?')) {
+                await deleteInvoice(id);
+                loadInvoices();
+            }
+        }
+
+        async function viewInvoice(id) {
+            const invoices = await getAllInvoices();
+            const invoice = invoices.find(inv => inv.id === id);
+            if (invoice) await generatePDF(invoice, id);
+        }
+
+        async function generatePDF(invoice, invoiceId) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const clients = await getAllClients();
+            const client = clients.find(c => c.id === invoice.clientId);
+
+            doc.setFontSize(20);
+            doc.text('INVOICE', 105, 20, { align: 'center' });
+            doc.setFontSize(10);
+            doc.text('Owensboro Mowing Company', 20, 40);
+            doc.text('Owensboro, Kentucky 42303', 20, 46);
+            doc.text('270.222.9613 or 270.499.7758', 20, 52);
+            doc.text('owensboromowingcompany.com', 20, 58);
+            doc.text('EIN: 93-2058075', 20, 64);
+            doc.text(`Invoice #: ${invoiceId}`, 140, 40);
+            doc.text(`Date: ${new Date(invoice.createdAt).toLocaleDateString()}`, 140, 46);
+            doc.setFontSize(12);
+            doc.text('Bill To:', 20, 80);
+            doc.setFontSize(10);
+            if (client) {
+                doc.text(client.name, 20, 88);
+                if (client.address) doc.text(client.address, 20, 94);
+                if (client.phone) doc.text(client.phone, 20, 100);
+                if (client.email) doc.text(client.email, 20, 106);
+            }
+            let y = 120;
+            doc.setFontSize(10);
+            doc.text('Description', 20, y);
+            doc.text('Qty', 120, y);
+            doc.text('Price', 145, y);
+            doc.text('Total', 170, y);
+            doc.line(20, y + 2, 190, y + 2);
+            y += 10;
+            invoice.items.forEach(item => {
+                doc.text(item.description, 20, y);
+                doc.text(item.quantity.toString(), 120, y);
+                doc.text('$' + item.price.toFixed(2), 145, y);
+                doc.text('$' + (item.quantity * item.price).toFixed(2), 170, y);
+                y += 8;
+            });
+            doc.line(20, y, 190, y);
+            y += 10;
+            doc.setFontSize(12);
+            doc.text('TOTAL:', 140, y);
+            doc.text('$' + invoice.total.toFixed(2), 170, y);
+            doc.save(`invoice-${invoiceId}.pdf`);
+        }
+
+        async function exportData() {
+            const clients = await getAllClients();
+            const invoices = await getAllInvoices();
+            const data = {
+                version: 1,
+                exportDate: new Date().toISOString(),
+                clients,
+                invoices
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `invoice-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        async function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (confirm('This will replace all data. Continue?')) {
+                        const clientTx = db.transaction('clients', 'readwrite');
+                        await clientTx.objectStore('clients').clear();
+                        const invoiceTx = db.transaction('invoices', 'readwrite');
+                        await invoiceTx.objectStore('invoices').clear();
+                        for (const client of data.clients) await addClient(client);
+                        for (const invoice of data.invoices) await addInvoice(invoice);
+                        alert('Data imported!');
+                        loadClients();
+                        loadInvoices();
+                    }
+                } catch (error) {
+                    alert('Error importing: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        async function clearAllData() {
+            if (confirm('Delete ALL data? Cannot be undone!')) {
+                const clientTx = db.transaction('clients', 'readwrite');
+                await clientTx.objectStore('clients').clear();
+                const invoiceTx = db.transaction('invoices', 'readwrite');
+                await invoiceTx.objectStore('invoices').clear();
+                alert('All data cleared!');
+                loadClients();
+                loadInvoices();
+            }
+        }
+
+        async function initApp() {
+            await initDB();
+            loadClients();
+            loadInvoices();
+            loadClientSelect();
+            addLineItem();
+        }
+
+        window.addEventListener('load', initApp);
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js');
+        }
+    </script>
+</body>
+</html>

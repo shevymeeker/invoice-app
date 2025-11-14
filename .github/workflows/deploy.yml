@@ -33,8 +33,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload the standalone directory
-          path: './standalone'
+          # Upload the root directory (excludes .git, node_modules, etc by default)
+          path: '.'
 
   # Deployment job
   deploy:
