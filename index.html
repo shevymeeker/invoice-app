@@ -4,278 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Owensboro Mowing Company - Invoice Manager</title>
-
-    <!-- PWA Configuration -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#5a5a5a">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="OMC Invoices">
-
-    <!-- jsPDF for PDF generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #d4d0c8;
-            font-size: 12px;
-        }
-
-        .header {
-            background: #5a5a5a;
-            color: white;
-            padding: 10px 15px;
-            border-bottom: 1px solid #333;
-        }
-
-        .header h1 {
-            font-size: 16px;
-            font-weight: normal;
-        }
-
-        .header p {
-            font-size: 11px;
-            color: #ddd;
-            margin-top: 2px;
-        }
-
-        /* Tab Navigation */
-        .tabs {
-            display: flex;
-            background: #f0f0f0;
-            border-bottom: 1px solid #999;
-            padding-left: 5px;
-        }
-
-        .tab {
-            padding: 6px 20px;
-            cursor: pointer;
-            border: 1px solid #999;
-            border-bottom: none;
-            background: #e0e0e0;
-            font-size: 12px;
-            color: #000;
-            margin-right: 2px;
-            margin-top: 3px;
-        }
-
-        .tab.active {
-            background: #ffffff;
-            margin-bottom: -1px;
-            padding-bottom: 7px;
-        }
-
-        .tab:hover:not(.active) {
-            background: #f5f5f5;
-        }
-
-        /* Tab Content */
-        .tab-content {
-            display: none;
-            padding: 12px;
-            background: white;
-            border: 1px solid #999;
-            border-top: none;
-            margin: 0 5px;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Panels */
-        .panel {
-            border: 1px solid #999;
-            margin-bottom: 10px;
-            background: #f8f8f8;
-        }
-
-        .panel-header {
-            background: linear-gradient(to bottom, #e8e8e8 0%, #d0d0d0 100%);
-            padding: 6px 10px;
-            border-bottom: 1px solid #999;
-            font-weight: bold;
-            font-size: 12px;
-        }
-
-        .panel-body {
-            padding: 10px;
-            background: white;
-        }
-
-        /* Forms */
-        .form-group {
-            margin-bottom: 10px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 3px;
-            font-size: 11px;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 3px 5px;
-            border: 1px solid #7f7f7f;
-            font-size: 11px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: 1px solid #10b981;
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 4px 12px;
-            border: 1px solid #7f7f7f;
-            font-size: 11px;
-            cursor: pointer;
-            background: linear-gradient(to bottom, #f0f0f0 0%, #e0e0e0 100%);
-            color: #000;
-        }
-
-        .btn:hover {
-            background: linear-gradient(to bottom, #e8e8e8 0%, #d0d0d0 100%);
-        }
-
-        .btn:active {
-            background: linear-gradient(to bottom, #d0d0d0 0%, #e0e0e0 100%);
-        }
-
-        .btn-primary {
-            background: linear-gradient(to bottom, #28a745 0%, #218838 100%);
-            color: white;
-            border-color: #1e7e34;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(to bottom, #218838 0%, #1e7e34 100%);
-        }
-
-        .btn-orange {
-            background: linear-gradient(to bottom, #fd7e14 0%, #f85a00 100%);
-            color: white;
-            border-color: #dc6200;
-        }
-
-        .btn-orange:hover {
-            background: linear-gradient(to bottom, #f85a00 0%, #dc6200 100%);
-        }
-
-        .btn-danger {
-            background: linear-gradient(to bottom, #dc3545 0%, #c82333 100%);
-            color: white;
-            border-color: #bd2130;
-        }
-
-        .btn-small {
-            padding: 2px 8px;
-            font-size: 10px;
-        }
-
-        /* Lists */
-        .list {
-            list-style: none;
-        }
-
-        .list-item {
-            background: #f8f8f8;
-            padding: 8px;
-            margin-bottom: 2px;
-            border: 1px solid #ccc;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .list-item:nth-child(even) {
-            background: #ffffff;
-        }
-
-        .list-item-content {
-            flex: 1;
-        }
-
-        .list-item-content h3 {
-            font-size: 12px;
-            margin-bottom: 2px;
-            font-weight: bold;
-        }
-
-        .list-item-content p {
-            font-size: 10px;
-            color: #555;
-        }
-
-        .list-item-actions {
-            display: flex;
-            gap: 4px;
-        }
-
-        /* Invoice Items */
-        .invoice-items {
-            margin-top: 12px;
-        }
-
-        .invoice-items h3 {
-            font-size: 11px;
-            margin-bottom: 6px;
-            font-weight: bold;
-        }
-
-        .item-row {
-            display: grid;
-            grid-template-columns: 2fr 80px 80px 80px 60px;
-            gap: 4px;
-            margin-bottom: 4px;
-        }
-
-        .item-row input {
-            padding: 3px;
-            border: 1px solid #7f7f7f;
-            font-size: 10px;
-        }
-
-        .total-section {
-            background: #f0f0f0;
-            border: 1px solid #999;
-            padding: 8px;
-            margin-top: 12px;
-            text-align: right;
-        }
-
-        .total-section h3 {
-            font-size: 13px;
-            font-weight: bold;
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 25px;
-            color: #666;
-            font-size: 11px;
-        }
-
-        /* Mobile */
-        @media (max-width: 600px) {
-            .item-row {
-                grid-template-columns: 1fr;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #d4d0c8; font-size: 12px; }
+        .header { background: #5a5a5a; color: white; padding: 10px 15px; border-bottom: 1px solid #333; }
+        .header h1 { font-size: 16px; font-weight: normal; }
+        .header p { font-size: 11px; color: #ddd; margin-top: 2px; }
+        .tabs { display: flex; background: #f0f0f0; border-bottom: 1px solid #999; padding-left: 5px; }
+        .tab { padding: 6px 20px; cursor: pointer; border: 1px solid #999; border-bottom: none; background: #e0e0e0; font-size: 12px; color: #000; margin-right: 2px; margin-top: 3px; }
+        .tab.active { background: #ffffff; margin-bottom: -1px; padding-bottom: 7px; }
+        .tab:hover:not(.active) { background: #f5f5f5; }
+        .tab-content { display: none; padding: 12px; background: white; border: 1px solid #999; border-top: none; margin: 0 5px; }
+        .tab-content.active { display: block; }
+        .panel { border: 1px solid #999; margin-bottom: 10px; background: #f8f8f8; }
+        .panel-header { background: linear-gradient(to bottom, #e8e8e8 0%, #d0d0d0 100%); padding: 6px 10px; border-bottom: 1px solid #999; font-weight: bold; font-size: 12px; }
+        .panel-body { padding: 10px; background: white; }
+        .form-group { margin-bottom: 10px; }
+        .form-group label { display: block; margin-bottom: 3px; font-size: 11px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 3px 5px; border: 1px solid #7f7f7f; font-size: 11px; font-family: 'Segoe UI'; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: 1px solid #10b981; }
+        .btn { padding: 4px 12px; border: 1px solid #7f7f7f; font-size: 11px; cursor: pointer; background: linear-gradient(to bottom, #f0f0f0 0%, #e0e0e0 100%); color: #000; }
+        .btn:hover { background: linear-gradient(to bottom, #e8e8e8 0%, #d0d0d0 100%); }
+        .btn-primary { background: linear-gradient(to bottom, #28a745 0%, #218838 100%); color: white; border-color: #1e7e34; }
+        .btn-orange { background: linear-gradient(to bottom, #fd7e14 0%, #f85a00 100%); color: white; border-color: #dc6200; }
+        .btn-danger { background: linear-gradient(to bottom, #dc3545 0%, #c82333 100%); color: white; border-color: #bd2130; }
+        .btn-small { padding: 2px 8px; font-size: 10px; }
+        .list { list-style: none; }
+        .list-item { background: #f8f8f8; padding: 8px; margin-bottom: 2px; border: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .list-item:nth-child(even) { background: #ffffff; }
+        .list-item:hover { background: #e8f5e9; }
+        .list-item-content { flex: 1; }
+        .list-item-content h3 { font-size: 12px; margin-bottom: 2px; font-weight: bold; }
+        .list-item-content p { font-size: 10px; color: #555; }
+        .list-item-actions { display: flex; gap: 4px; }
+        .invoice-items { margin-top: 12px; }
+        .invoice-items h3 { font-size: 11px; margin-bottom: 6px; font-weight: bold; }
+        .item-row { display: grid; grid-template-columns: 2fr 80px 80px 80px 60px; gap: 4px; margin-bottom: 4px; }
+        .item-row input { padding: 3px; border: 1px solid #7f7f7f; font-size: 10px; }
+        .total-section { background: #f0f0f0; border: 1px solid #999; padding: 8px; margin-top: 12px; text-align: right; }
+        .total-section h3 { font-size: 13px; font-weight: bold; }
+        .empty-state { text-align: center; padding: 25px; color: #666; font-size: 11px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; border: 2px solid #999; width: 90%; max-width: 700px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { background: linear-gradient(to bottom, #e8e8e8 0%, #d0d0d0 100%); padding: 8px 12px; border-bottom: 1px solid #999; display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h2 { font-size: 13px; font-weight: bold; }
+        .modal-close { cursor: pointer; font-size: 18px; font-weight: bold; padding: 0 6px; }
+        .modal-body { padding: 12px; }
+        .badge { display: inline-block; padding: 2px 6px; font-size: 10px; border-radius: 3px; margin-left: 5px; }
+        .badge-draft { background: #ccc; }
+        .badge-sent { background: #ffc107; }
+        .badge-approved { background: #28a745; color: white; }
+        .badge-paid { background: #28a745; color: white; }
+        .badge-rejected { background: #dc3545; color: white; }
+        @media (max-width: 600px) { .item-row { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -286,6 +72,7 @@
 
     <div class="tabs">
         <button class="tab active" onclick="switchTab('clients')">Clients</button>
+        <button class="tab" onclick="switchTab('estimates')">Estimates</button>
         <button class="tab" onclick="switchTab('invoices')">Invoices</button>
         <button class="tab" onclick="switchTab('settings')">Settings</button>
     </div>
@@ -296,32 +83,42 @@
             <div class="panel-header">Add New Client</div>
             <div class="panel-body">
                 <form id="client-form">
-                    <div class="form-group">
-                        <label>Name:</label>
-                        <input type="text" id="client-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Phone:</label>
-                        <input type="tel" id="client-phone">
-                    </div>
-                    <div class="form-group">
-                        <label>Email:</label>
-                        <input type="email" id="client-email">
-                    </div>
-                    <div class="form-group">
-                        <label>Address:</label>
-                        <textarea id="client-address" rows="2"></textarea>
-                    </div>
+                    <div class="form-group"><label>Name:</label><input type="text" id="client-name" required></div>
+                    <div class="form-group"><label>Phone:</label><input type="tel" id="client-phone"></div>
+                    <div class="form-group"><label>Email:</label><input type="email" id="client-email"></div>
+                    <div class="form-group"><label>Address:</label><textarea id="client-address" rows="2"></textarea></div>
                     <button type="submit" class="btn btn-primary">Add Client</button>
                 </form>
             </div>
         </div>
-
         <div class="panel">
-            <div class="panel-header">Client List</div>
+            <div class="panel-header">Client List (Click to view details)</div>
+            <div class="panel-body"><ul id="clients-list" class="list"></ul></div>
+        </div>
+    </div>
+
+    <!-- Estimates Tab -->
+    <div id="estimates-tab" class="tab-content">
+        <div class="panel">
+            <div class="panel-header">Create Estimate</div>
             <div class="panel-body">
-                <ul id="clients-list" class="list"></ul>
+                <form id="estimate-form">
+                    <div class="form-group"><label>Client:</label><select id="estimate-client" required><option value="">-- Select Client --</option></select></div>
+                    <div class="invoice-items">
+                        <h3>Line Items</h3>
+                        <div id="estimate-items-container"></div>
+                        <button type="button" class="btn" onclick="addEstimateItem()">Add Item</button>
+                    </div>
+                    <div class="total-section"><h3>Total: $<span id="estimate-total">0.00</span></h3></div>
+                    <div style="margin-top: 10px;">
+                        <button type="submit" class="btn btn-primary">Save Estimate</button>
+                    </div>
+                </form>
             </div>
+        </div>
+        <div class="panel">
+            <div class="panel-header">Estimate History</div>
+            <div class="panel-body"><ul id="estimates-list" class="list"></ul></div>
         </div>
     </div>
 
@@ -331,35 +128,22 @@
             <div class="panel-header">Create Invoice</div>
             <div class="panel-body">
                 <form id="invoice-form">
-                    <div class="form-group">
-                        <label>Client:</label>
-                        <select id="invoice-client" required>
-                            <option value="">-- Select Client --</option>
-                        </select>
-                    </div>
-
+                    <div class="form-group"><label>Client:</label><select id="invoice-client" required><option value="">-- Select Client --</option></select></div>
                     <div class="invoice-items">
                         <h3>Line Items</h3>
                         <div id="items-container"></div>
                         <button type="button" class="btn" onclick="addLineItem()">Add Item</button>
                     </div>
-
-                    <div class="total-section">
-                        <h3>Total: $<span id="invoice-total">0.00</span></h3>
-                    </div>
-
+                    <div class="total-section"><h3>Total: $<span id="invoice-total">0.00</span></h3></div>
                     <div style="margin-top: 10px;">
                         <button type="submit" class="btn btn-orange">Create Invoice & Generate PDF</button>
                     </div>
                 </form>
             </div>
         </div>
-
         <div class="panel">
             <div class="panel-header">Invoice History</div>
-            <div class="panel-body">
-                <ul id="invoices-list" class="list"></ul>
-            </div>
+            <div class="panel-body"><ul id="invoices-list" class="list"></ul></div>
         </div>
     </div>
 
@@ -377,7 +161,6 @@
                 </table>
             </div>
         </div>
-
         <div class="panel">
             <div class="panel-header">Data Management</div>
             <div class="panel-body">
@@ -389,27 +172,61 @@
         </div>
     </div>
 
+    <!-- Client Detail Modal -->
+    <div id="client-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="client-modal-title">Client Details</h2>
+                <span class="modal-close" onclick="closeClientModal()">✕</span>
+            </div>
+            <div class="modal-body">
+                <div class="panel">
+                    <div class="panel-header">Contact Information</div>
+                    <div class="panel-body" id="client-info"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">Notes</div>
+                    <div class="panel-body">
+                        <textarea id="client-notes" rows="4" style="width: 100%; padding: 5px; border: 1px solid #7f7f7f; font-size: 11px;"></textarea>
+                        <button class="btn btn-primary" onclick="saveClientNotes()" style="margin-top: 5px;">Save Notes</button>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">Estimate History</div>
+                    <div class="panel-body"><ul id="client-estimates-list" class="list"></ul></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">Invoice History</div>
+                    <div class="panel-body"><ul id="client-invoices-list" class="list"></ul></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const DB_NAME = 'InvoiceAppDB';
-        const DB_VERSION = 1;
+        const DB_VERSION = 2;
         let db;
+        let currentClientId = null;
 
         function initDB() {
             return new Promise((resolve, reject) => {
                 const request = indexedDB.open(DB_NAME, DB_VERSION);
                 request.onerror = () => reject(request.error);
-                request.onsuccess = () => {
-                    db = request.result;
-                    resolve(db);
-                };
+                request.onsuccess = () => { db = request.result; resolve(db); };
                 request.onupgradeneeded = (event) => {
                     const db = event.target.result;
                     if (!db.objectStoreNames.contains('clients')) {
                         db.createObjectStore('clients', { keyPath: 'id', autoIncrement: true });
                     }
+                    if (!db.objectStoreNames.contains('estimates')) {
+                        const estimateStore = db.createObjectStore('estimates', { keyPath: 'id', autoIncrement: true });
+                        estimateStore.createIndex('clientId', 'clientId', { unique: false });
+                    }
                     if (!db.objectStoreNames.contains('invoices')) {
                         const invoiceStore = db.createObjectStore('invoices', { keyPath: 'id', autoIncrement: true });
                         invoiceStore.createIndex('clientId', 'clientId', { unique: false });
+                        invoiceStore.createIndex('estimateId', 'estimateId', { unique: false });
                     }
                 };
             });
@@ -425,29 +242,21 @@
             });
         }
 
-        async function addClient(client) {
-            return performTransaction('clients', 'readwrite', store => store.add(client));
-        }
-
-        async function getAllClients() {
-            return performTransaction('clients', 'readonly', store => store.getAll());
-        }
-
-        async function deleteClient(id) {
-            return performTransaction('clients', 'readwrite', store => store.delete(id));
-        }
-
-        async function addInvoice(invoice) {
-            return performTransaction('invoices', 'readwrite', store => store.add(invoice));
-        }
-
-        async function getAllInvoices() {
-            return performTransaction('invoices', 'readonly', store => store.getAll());
-        }
-
-        async function deleteInvoice(id) {
-            return performTransaction('invoices', 'readwrite', store => store.delete(id));
-        }
+        async function addClient(client) { return performTransaction('clients', 'readwrite', store => store.add(client)); }
+        async function getAllClients() { return performTransaction('clients', 'readonly', store => store.getAll()); }
+        async function getClient(id) { return performTransaction('clients', 'readonly', store => store.get(id)); }
+        async function updateClient(id, data) { return performTransaction('clients', 'readwrite', store => store.put({...data, id})); }
+        async function deleteClient(id) { return performTransaction('clients', 'readwrite', store => store.delete(id)); }
+        async function addEstimate(estimate) { return performTransaction('estimates', 'readwrite', store => store.add(estimate)); }
+        async function getAllEstimates() { return performTransaction('estimates', 'readonly', store => store.getAll()); }
+        async function getEstimate(id) { return performTransaction('estimates', 'readonly', store => store.get(id)); }
+        async function updateEstimate(id, data) { return performTransaction('estimates', 'readwrite', store => store.put({...data, id})); }
+        async function deleteEstimate(id) { return performTransaction('estimates', 'readwrite', store => store.delete(id)); }
+        async function addInvoice(invoice) { return performTransaction('invoices', 'readwrite', store => store.add(invoice)); }
+        async function getAllInvoices() { return performTransaction('invoices', 'readonly', store => store.getAll()); }
+        async function getInvoice(id) { return performTransaction('invoices', 'readonly', store => store.get(id)); }
+        async function updateInvoice(id, data) { return performTransaction('invoices', 'readwrite', store => store.put({...data, id})); }
+        async function deleteInvoice(id) { return performTransaction('invoices', 'readwrite', store => store.delete(id)); }
 
         function switchTab(tabName) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -455,10 +264,8 @@
             event.target.classList.add('active');
             document.getElementById(tabName + '-tab').classList.add('active');
             if (tabName === 'clients') loadClients();
-            if (tabName === 'invoices') {
-                loadInvoices();
-                loadClientSelect();
-            }
+            if (tabName === 'estimates') { loadEstimates(); loadClientSelect('estimate'); }
+            if (tabName === 'invoices') { loadInvoices(); loadClientSelect('invoice'); }
         }
 
         document.getElementById('client-form').addEventListener('submit', async (e) => {
@@ -468,6 +275,7 @@
                 phone: document.getElementById('client-phone').value,
                 email: document.getElementById('client-email').value,
                 address: document.getElementById('client-address').value,
+                notes: '',
                 createdAt: new Date().toISOString()
             };
             await addClient(client);
@@ -484,35 +292,208 @@
                 return;
             }
             list.innerHTML = clients.map(client => `
-                <li class="list-item">
+                <li class="list-item" onclick="openClientModal(${client.id})">
                     <div class="list-item-content">
                         <h3>${client.name}</h3>
                         <p>${client.phone || 'No phone'} | ${client.email || 'No email'}</p>
-                        ${client.address ? `<p>${client.address}</p>` : ''}
-                    </div>
-                    <div class="list-item-actions">
-                        <button class="btn btn-danger btn-small" onclick="removeClient(${client.id})">Delete</button>
                     </div>
                 </li>
             `).join('');
         }
 
-        async function removeClient(id) {
-            if (confirm('Delete this client?')) {
-                await deleteClient(id);
-                loadClients();
+        async function openClientModal(clientId) {
+            currentClientId = clientId;
+            const client = await getClient(clientId);
+            const estimates = (await getAllEstimates()).filter(e => e.clientId === clientId);
+            const invoices = (await getAllInvoices()).filter(i => i.clientId === clientId);
+
+            document.getElementById('client-modal-title').textContent = client.name;
+            document.getElementById('client-info').innerHTML = `
+                <p><b>Phone:</b> ${client.phone || 'N/A'}</p>
+                <p><b>Email:</b> ${client.email || 'N/A'}</p>
+                <p><b>Address:</b> ${client.address || 'N/A'}</p>
+            `;
+            document.getElementById('client-notes').value = client.notes || '';
+
+            const estimatesList = document.getElementById('client-estimates-list');
+            if (estimates.length === 0) {
+                estimatesList.innerHTML = '<div class="empty-state">No estimates</div>';
+            } else {
+                estimatesList.innerHTML = estimates.map(est => `
+                    <li class="list-item">
+                        <div class="list-item-content">
+                            <h3>${new Date(est.createdAt).toLocaleDateString()} - $${est.total.toFixed(2)}
+                                <span class="badge badge-${est.status}">${est.status}</span>
+                            </h3>
+                            <p>${est.items.length} items</p>
+                        </div>
+                    </li>
+                `).join('');
             }
+
+            const invoicesList = document.getElementById('client-invoices-list');
+            if (invoices.length === 0) {
+                invoicesList.innerHTML = '<div class="empty-state">No invoices</div>';
+            } else {
+                invoicesList.innerHTML = invoices.map(inv => `
+                    <li class="list-item">
+                        <div class="list-item-content">
+                            <h3>${new Date(inv.createdAt).toLocaleDateString()} - $${inv.total.toFixed(2)}
+                                <span class="badge badge-${inv.status}">${inv.status}</span>
+                            </h3>
+                            <p>${inv.items.length} items</p>
+                        </div>
+                        <div class="list-item-actions">
+                            <button class="btn btn-primary btn-small" onclick="event.stopPropagation(); viewInvoice(${inv.id})">PDF</button>
+                        </div>
+                    </li>
+                `).join('');
+            }
+
+            document.getElementById('client-modal').classList.add('active');
         }
 
-        async function loadClientSelect() {
+        function closeClientModal() {
+            document.getElementById('client-modal').classList.remove('active');
+            currentClientId = null;
+        }
+
+        async function saveClientNotes() {
+            if (!currentClientId) return;
+            const client = await getClient(currentClientId);
+            client.notes = document.getElementById('client-notes').value;
+            await updateClient(currentClientId, client);
+            alert('Notes saved.');
+        }
+
+        async function loadClientSelect(type) {
             const clients = await getAllClients();
-            const select = document.getElementById('invoice-client');
+            const select = document.getElementById(type + '-client');
             select.innerHTML = '<option value="">-- Select Client --</option>' +
                 clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
         }
 
-        let itemCount = 0;
+        let estimateItemCount = 0;
+        function addEstimateItem() {
+            estimateItemCount++;
+            const container = document.getElementById('estimate-items-container');
+            const itemRow = document.createElement('div');
+            itemRow.className = 'item-row';
+            itemRow.id = 'estimate-item-' + estimateItemCount;
+            itemRow.innerHTML = `
+                <input type="text" placeholder="Description" class="estimate-item-desc" required>
+                <input type="number" placeholder="Qty" class="estimate-item-qty" value="1" min="1" required>
+                <input type="number" placeholder="Price" class="estimate-item-price" value="0" step="0.01" min="0" required>
+                <input type="text" class="estimate-item-total" value="$0.00" readonly>
+                <button type="button" class="btn btn-small" onclick="removeEstimateItem(${estimateItemCount})">X</button>
+            `;
+            container.appendChild(itemRow);
+            itemRow.querySelector('.estimate-item-qty').addEventListener('input', calculateEstimateTotal);
+            itemRow.querySelector('.estimate-item-price').addEventListener('input', calculateEstimateTotal);
+        }
 
+        function removeEstimateItem(id) {
+            document.getElementById('estimate-item-' + id).remove();
+            calculateEstimateTotal();
+        }
+
+        function calculateEstimateTotal() {
+            let total = 0;
+            document.querySelectorAll('#estimate-items-container .item-row').forEach(row => {
+                const qty = parseFloat(row.querySelector('.estimate-item-qty').value) || 0;
+                const price = parseFloat(row.querySelector('.estimate-item-price').value) || 0;
+                const itemTotal = qty * price;
+                row.querySelector('.estimate-item-total').value = '$' + itemTotal.toFixed(2);
+                total += itemTotal;
+            });
+            document.getElementById('estimate-total').textContent = total.toFixed(2);
+        }
+
+        document.getElementById('estimate-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const clientId = parseInt(document.getElementById('estimate-client').value);
+            if (!clientId) { alert('Select a client'); return; }
+            const items = [];
+            document.querySelectorAll('#estimate-items-container .item-row').forEach(row => {
+                items.push({
+                    description: row.querySelector('.estimate-item-desc').value,
+                    quantity: parseFloat(row.querySelector('.estimate-item-qty').value),
+                    price: parseFloat(row.querySelector('.estimate-item-price').value)
+                });
+            });
+            if (items.length === 0) { alert('Add at least one item'); return; }
+            const total = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+            const estimate = { clientId, items, total, createdAt: new Date().toISOString(), status: 'draft' };
+            await addEstimate(estimate);
+            e.target.reset();
+            document.getElementById('estimate-items-container').innerHTML = '';
+            estimateItemCount = 0;
+            calculateEstimateTotal();
+            loadEstimates();
+            alert('Estimate saved!');
+        });
+
+        async function loadEstimates() {
+            const estimates = await getAllEstimates();
+            const clients = await getAllClients();
+            const list = document.getElementById('estimates-list');
+            if (estimates.length === 0) {
+                list.innerHTML = '<div class="empty-state">No estimates. Create an estimate above.</div>';
+                return;
+            }
+            list.innerHTML = estimates.map(estimate => {
+                const client = clients.find(c => c.id === estimate.clientId);
+                const date = new Date(estimate.createdAt).toLocaleDateString();
+                return `
+                    <li class="list-item">
+                        <div class="list-item-content">
+                            <h3>${client ? client.name : 'Unknown'} - $${estimate.total.toFixed(2)}
+                                <span class="badge badge-${estimate.status}">${estimate.status}</span>
+                            </h3>
+                            <p>${date} | ${estimate.items.length} items</p>
+                        </div>
+                        <div class="list-item-actions">
+                            ${estimate.status !== 'approved' ? `<button class="btn btn-primary btn-small" onclick="event.stopPropagation(); updateEstimateStatus(${estimate.id}, 'approved')">Approve</button>` : ''}
+                            ${estimate.status === 'approved' ? `<button class="btn btn-orange btn-small" onclick="event.stopPropagation(); convertEstimateToInvoice(${estimate.id})">Convert to Invoice</button>` : ''}
+                            <button class="btn btn-danger btn-small" onclick="event.stopPropagation(); removeEstimate(${estimate.id})">Delete</button>
+                        </div>
+                    </li>
+                `;
+            }).join('');
+        }
+
+        async function updateEstimateStatus(id, status) {
+            const estimate = await getEstimate(id);
+            estimate.status = status;
+            await updateEstimate(id, estimate);
+            loadEstimates();
+            alert(`Estimate ${status}!`);
+        }
+
+        async function removeEstimate(id) {
+            if (confirm('Delete this estimate?')) {
+                await deleteEstimate(id);
+                loadEstimates();
+            }
+        }
+
+        async function convertEstimateToInvoice(estimateId) {
+            const estimate = await getEstimate(estimateId);
+            const invoice = {
+                clientId: estimate.clientId,
+                estimateId: estimateId,
+                items: estimate.items,
+                total: estimate.total,
+                createdAt: new Date().toISOString(),
+                status: 'draft'
+            };
+            const invoiceId = await addInvoice(invoice);
+            await generatePDF(invoice, invoiceId);
+            alert('Invoice created from estimate! PDF generated.');
+            switchTab('invoices');
+        }
+
+        let itemCount = 0;
         function addLineItem() {
             itemCount++;
             const container = document.getElementById('items-container');
@@ -538,7 +519,7 @@
 
         function calculateTotal() {
             let total = 0;
-            document.querySelectorAll('.item-row').forEach(row => {
+            document.querySelectorAll('#items-container .item-row').forEach(row => {
                 const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
                 const price = parseFloat(row.querySelector('.item-price').value) || 0;
                 const itemTotal = qty * price;
@@ -551,30 +532,18 @@
         document.getElementById('invoice-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const clientId = parseInt(document.getElementById('invoice-client').value);
-            if (!clientId) {
-                alert('Select a client');
-                return;
-            }
+            if (!clientId) { alert('Select a client'); return; }
             const items = [];
-            document.querySelectorAll('.item-row').forEach(row => {
+            document.querySelectorAll('#items-container .item-row').forEach(row => {
                 items.push({
                     description: row.querySelector('.item-desc').value,
                     quantity: parseFloat(row.querySelector('.item-qty').value),
                     price: parseFloat(row.querySelector('.item-price').value)
                 });
             });
-            if (items.length === 0) {
-                alert('Add at least one item');
-                return;
-            }
+            if (items.length === 0) { alert('Add at least one item'); return; }
             const total = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
-            const invoice = {
-                clientId,
-                items,
-                total,
-                createdAt: new Date().toISOString(),
-                status: 'draft'
-            };
+            const invoice = { clientId, estimateId: null, items, total, createdAt: new Date().toISOString(), status: 'draft' };
             const invoiceId = await addInvoice(invoice);
             await generatePDF(invoice, invoiceId);
             e.target.reset();
@@ -599,12 +568,15 @@
                 return `
                     <li class="list-item">
                         <div class="list-item-content">
-                            <h3>${client ? client.name : 'Unknown'}</h3>
-                            <p>${date} | ${invoice.items.length} items | $${invoice.total.toFixed(2)}</p>
+                            <h3>${client ? client.name : 'Unknown'} - $${invoice.total.toFixed(2)}
+                                <span class="badge badge-${invoice.status}">${invoice.status}</span>
+                            </h3>
+                            <p>${date} | ${invoice.items.length} items</p>
                         </div>
                         <div class="list-item-actions">
-                            <button class="btn btn-primary btn-small" onclick="viewInvoice(${invoice.id})">View PDF</button>
-                            <button class="btn btn-danger btn-small" onclick="removeInvoice(${invoice.id})">Delete</button>
+                            <button class="btn btn-primary btn-small" onclick="event.stopPropagation(); viewInvoice(${invoice.id})">View PDF</button>
+                            <button class="btn btn-orange btn-small" onclick="event.stopPropagation(); shareViaSMS(${invoice.id})">Share SMS</button>
+                            <button class="btn btn-danger btn-small" onclick="event.stopPropagation(); removeInvoice(${invoice.id})">Delete</button>
                         </div>
                     </li>
                 `;
@@ -619,17 +591,26 @@
         }
 
         async function viewInvoice(id) {
-            const invoices = await getAllInvoices();
-            const invoice = invoices.find(inv => inv.id === id);
+            const invoice = await getInvoice(id);
             if (invoice) await generatePDF(invoice, id);
+        }
+
+        async function shareViaSMS(id) {
+            const invoice = await getInvoice(id);
+            const client = await getClient(invoice.clientId);
+            if (!client.phone) {
+                alert('Client has no phone number on file.');
+                return;
+            }
+            const message = `Invoice from Owensboro Mowing Company\nAmount: $${invoice.total.toFixed(2)}\nItems: ${invoice.items.length}\nDate: ${new Date(invoice.createdAt).toLocaleDateString()}`;
+            const smsURL = `sms:${client.phone}?body=${encodeURIComponent(message)}`;
+            window.location.href = smsURL;
         }
 
         async function generatePDF(invoice, invoiceId) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            const clients = await getAllClients();
-            const client = clients.find(c => c.id === invoice.clientId);
-
+            const client = await getClient(invoice.clientId);
             doc.setFontSize(20);
             doc.text('INVOICE', 105, 20, { align: 'center' });
             doc.setFontSize(10);
@@ -650,7 +631,6 @@
                 if (client.email) doc.text(client.email, 20, 106);
             }
             let y = 120;
-            doc.setFontSize(10);
             doc.text('Description', 20, y);
             doc.text('Qty', 120, y);
             doc.text('Price', 145, y);
@@ -674,13 +654,9 @@
 
         async function exportData() {
             const clients = await getAllClients();
+            const estimates = await getAllEstimates();
             const invoices = await getAllInvoices();
-            const data = {
-                version: 1,
-                exportDate: new Date().toISOString(),
-                clients,
-                invoices
-            };
+            const data = { version: 2, exportDate: new Date().toISOString(), clients, estimates, invoices };
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -698,31 +674,30 @@
                 try {
                     const data = JSON.parse(e.target.result);
                     if (confirm('This will replace all data. Continue?')) {
-                        const clientTx = db.transaction('clients', 'readwrite');
-                        await clientTx.objectStore('clients').clear();
-                        const invoiceTx = db.transaction('invoices', 'readwrite');
-                        await invoiceTx.objectStore('invoices').clear();
-                        for (const client of data.clients) await addClient(client);
-                        for (const invoice of data.invoices) await addInvoice(invoice);
+                        await performTransaction('clients', 'readwrite', store => store.clear());
+                        await performTransaction('estimates', 'readwrite', store => store.clear());
+                        await performTransaction('invoices', 'readwrite', store => store.clear());
+                        for (const client of data.clients || []) await addClient(client);
+                        for (const estimate of data.estimates || []) await addEstimate(estimate);
+                        for (const invoice of data.invoices || []) await addInvoice(invoice);
                         alert('Data imported!');
                         loadClients();
+                        loadEstimates();
                         loadInvoices();
                     }
-                } catch (error) {
-                    alert('Error importing: ' + error.message);
-                }
+                } catch (error) { alert('Error importing: ' + error.message); }
             };
             reader.readAsText(file);
         }
 
         async function clearAllData() {
             if (confirm('Delete ALL data? Cannot be undone!')) {
-                const clientTx = db.transaction('clients', 'readwrite');
-                await clientTx.objectStore('clients').clear();
-                const invoiceTx = db.transaction('invoices', 'readwrite');
-                await invoiceTx.objectStore('invoices').clear();
+                await performTransaction('clients', 'readwrite', store => store.clear());
+                await performTransaction('estimates', 'readwrite', store => store.clear());
+                await performTransaction('invoices', 'readwrite', store => store.clear());
                 alert('All data cleared!');
                 loadClients();
+                loadEstimates();
                 loadInvoices();
             }
         }
@@ -730,16 +705,16 @@
         async function initApp() {
             await initDB();
             loadClients();
+            loadEstimates();
             loadInvoices();
-            loadClientSelect();
+            loadClientSelect('estimate');
+            loadClientSelect('invoice');
+            addEstimateItem();
             addLineItem();
         }
 
         window.addEventListener('load', initApp);
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('service-worker.js');
-        }
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('service-worker.js'); }
     </script>
 </body>
 </html>
