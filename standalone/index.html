@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owensboro Mowing Company - Invoice App</title>
+
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="OMC Invoices">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+        }
+
+        /* Your app styles go here */
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* PWA Install Prompt Styles */
+        .install-prompt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 20px;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .install-prompt-overlay.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .install-prompt-container {
+            background: white;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .install-prompt-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            color: #666;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .install-prompt-close:hover {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .install-prompt-header {
+            text-align: center;
+            padding: 32px 24px 16px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .install-prompt-icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .install-prompt-header h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .install-prompt-body {
+            padding: 24px;
+        }
+
+        .install-prompt-intro {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #555;
+            margin: 0 0 16px 0;
+            text-align: center;
+        }
+
+        .install-prompt-note {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: #856404;
+            line-height: 1.4;
+        }
+
+        .install-prompt-steps {
+            margin-bottom: 20px;
+        }
+
+        .install-prompt-steps h3 {
+            font-size: 18px;
+            color: #333;
+            margin: 0 0 12px 0;
+            font-weight: 600;
+        }
+
+        .install-prompt-steps ol {
+            margin: 0;
+            padding-left: 24px;
+            color: #555;
+        }
+
+        .install-prompt-steps ol li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+            font-size: 15px;
+        }
+
+        .install-prompt-benefits {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .install-prompt-benefits h3 {
+            font-size: 16px;
+            color: #333;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+
+        .install-prompt-benefits ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .install-prompt-benefits ul li {
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #555;
+            line-height: 1.4;
+        }
+
+        .install-prompt-button-primary {
+            width: 100%;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 16px 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .install-prompt-button-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .install-prompt-footer {
+            padding: 16px 24px 24px;
+            text-align: center;
+        }
+
+        .install-prompt-button-secondary {
+            background: transparent;
+            border: 2px solid #ddd;
+            color: #666;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .install-prompt-button-secondary:hover {
+            border-color: #999;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .install-prompt-overlay {
+                padding: 0;
+            }
+            .install-prompt-container {
+                max-width: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Your Invoice App Goes Here -->
+    <div class="app-container">
+        <header>
+            <h1>🏡 Owensboro Mowing Company</h1>
+            <p>Invoice Management System</p>
+        </header>
+
+        <div class="content">
+            <h2>Welcome!</h2>
+            <p>This app works directly in your browser - no downloads required!</p>
+            <p style="margin-top: 16px;">
+                <strong>Optional:</strong> You can install it on your phone or computer for quick access,
+                but it's completely optional. Just click "Maybe Later" if you prefer to use it in your browser.
+            </p>
+
+            <!-- Your app content goes here -->
+        </div>
+    </div>
+
+    <!-- PWA Install Prompt (shows automatically on first visit) -->
+    <div id="installPrompt" class="install-prompt-overlay">
+        <div class="install-prompt-container">
+            <button class="install-prompt-close" onclick="dismissInstallPrompt()" aria-label="Close">✕</button>
+
+            <div class="install-prompt-header">
+                <span class="install-prompt-icon" id="platformIcon">📱</span>
+                <h2 id="installTitle">Install App</h2>
+            </div>
+
+            <div class="install-prompt-body">
+                <p class="install-prompt-intro">
+                    <strong>Installation is 100% optional!</strong><br>
+                    Use the app directly in your browser, or install it for quick access.
+                </p>
+
+                <div id="browserNote" class="install-prompt-note" style="display: none;"></div>
+
+                <div class="install-prompt-steps">
+                    <h3>Installation Steps:</h3>
+                    <ol id="installSteps"></ol>
+                </div>
+
+                <button id="installButton" class="install-prompt-button-primary" style="display: none;">
+                    Install Now
+                </button>
+
+                <div class="install-prompt-benefits">
+                    <h3>Benefits of Installing:</h3>
+                    <ul>
+                        <li>✓ Quick access from your home screen</li>
+                        <li>✓ Works offline (no internet needed)</li>
+                        <li>✓ Faster loading</li>
+                        <li>✓ No app store required</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="install-prompt-footer">
+                <button class="install-prompt-button-secondary" onclick="dismissInstallPrompt()">
+                    Maybe Later - Use in Browser
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // PWA Detection and Install Prompt Logic
+        let deferredPrompt = null;
+
+        // Check if running as PWA
+        function isPWA() {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+            const isIOSStandalone = window.navigator.standalone === true;
+            return isStandalone || isIOSStandalone;
+        }
+
+        // Detect platform
+        function getPlatform() {
+            const userAgent = window.navigator.userAgent.toLowerCase();
+            if (/iphone|ipad|ipod/.test(userAgent)) return 'ios';
+            if (/android/.test(userAgent)) return 'android';
+            return 'desktop';
+        }
+
+        // Detect browser
+        function getBrowser() {
+            const userAgent = window.navigator.userAgent.toLowerCase();
+            if (/safari/.test(userAgent) && !/chrome/.test(userAgent)) return 'safari';
+            if (/chrome/.test(userAgent)) return 'chrome';
+            if (/firefox/.test(userAgent)) return 'firefox';
+            if (/edg/.test(userAgent)) return 'edge';
+            return 'other';
+        }
+
+        // Check if should show prompt
+        function shouldShowInstallPrompt() {
+            if (isPWA()) return false;
+
+            const dismissedAt = localStorage.getItem('pwaPromptDismissed');
+            if (dismissedAt) {
+                const daysSinceDismissed = (Date.now() - parseInt(dismissedAt)) / (1000 * 60 * 60 * 24);
+                if (daysSinceDismissed < 7) return false;
+            }
+
+            return true;
+        }
+
+        // Get platform-specific instructions
+        function getInstallInstructions() {
+            const platform = getPlatform();
+            const browser = getBrowser();
+
+            if (platform === 'ios') {
+                return {
+                    icon: '🍎',
+                    title: 'Install on iPhone/iPad',
+                    steps: [
+                        'Tap the Share button (square with arrow) at the bottom of Safari',
+                        'Scroll down and tap "Add to Home Screen"',
+                        'Tap "Add" in the top right corner',
+                        'The app icon will appear on your home screen'
+                    ],
+                    note: browser !== 'safari' ? '⚠️ Installation only works in Safari browser on iOS. Please open this page in Safari.' : null
+                };
+            }
+
+            if (platform === 'android') {
+                return {
+                    icon: '🤖',
+                    title: 'Install on Android',
+                    steps: [
+                        'Tap the menu button (three dots) in the top right corner',
+                        'Tap "Install App" or "Add to Home Screen"',
+                        'Tap "Install" in the popup',
+                        'The app icon will appear on your home screen'
+                    ],
+                    note: browser !== 'chrome' ? '⚠️ Installation works best in Chrome browser on Android.' : null
+                };
+            }
+
+            return {
+                icon: '💻',
+                title: 'Install on Desktop',
+                steps: [
+                    'Click the install icon in the address bar (or menu)',
+                    'Click "Install" in the popup',
+                    'The app will open in its own window',
+                    'Find it in your apps menu or taskbar'
+                ],
+                note: null
+            };
+        }
+
+        // Show install prompt
+        function showInstallPrompt() {
+            if (!shouldShowInstallPrompt()) return;
+
+            const instructions = getInstallInstructions();
+            const platform = getPlatform();
+
+            document.getElementById('platformIcon').textContent = instructions.icon;
+            document.getElementById('installTitle').textContent = instructions.title;
+
+            const stepsList = document.getElementById('installSteps');
+            stepsList.innerHTML = '';
+            instructions.steps.forEach(step => {
+                const li = document.createElement('li');
+                li.textContent = step;
+                stepsList.appendChild(li);
+            });
+
+            if (instructions.note) {
+                document.getElementById('browserNote').textContent = instructions.note;
+                document.getElementById('browserNote').style.display = 'block';
+            }
+
+            if (deferredPrompt && platform !== 'ios') {
+                document.getElementById('installButton').style.display = 'block';
+            }
+
+            document.getElementById('installPrompt').classList.add('show');
+        }
+
+        // Dismiss install prompt
+        function dismissInstallPrompt() {
+            localStorage.setItem('pwaPromptDismissed', Date.now().toString());
+            document.getElementById('installPrompt').classList.remove('show');
+        }
+
+        // Trigger native install
+        async function triggerInstall() {
+            if (!deferredPrompt) return;
+
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+
+            if (outcome === 'accepted') {
+                dismissInstallPrompt();
+            }
+
+            deferredPrompt = null;
+        }
+
+        // Listen for beforeinstallprompt event
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            showInstallPrompt();
+        });
+
+        // Show prompt on load
+        window.addEventListener('load', () => {
+            // Delay showing prompt by 2 seconds to not overwhelm users
+            setTimeout(showInstallPrompt, 2000);
+        });
+
+        // Install button click handler
+        document.getElementById('installButton').addEventListener('click', triggerInstall);
+
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
