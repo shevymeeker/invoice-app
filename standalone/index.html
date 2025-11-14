@@ -11,7 +11,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="OMC Invoices">
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         * {
@@ -23,488 +25,814 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: #f5f5f5;
+            padding-bottom: 80px;
         }
 
-        /* Your app styles go here */
-        .app-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        header {
+        .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 30px 20px;
+            padding: 20px;
             text-align: center;
-            border-radius: 12px;
-            margin-bottom: 30px;
-        }
-
-        header h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-
-        header p {
-            font-size: 16px;
-            opacity: 0.9;
-        }
-
-        .content {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        /* PWA Install Prompt Styles */
-        .install-prompt-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            padding: 20px;
-            animation: fadeIn 0.3s ease-in;
-        }
-
-        .install-prompt-overlay.show {
-            display: flex;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .install-prompt-container {
-            background: white;
-            border-radius: 16px;
-            max-width: 500px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            position: relative;
-            animation: slideUp 0.3s ease-out;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .install-prompt-close {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: transparent;
-            border: none;
+        .header h1 {
             font-size: 24px;
-            color: #666;
-            cursor: pointer;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: background-color 0.2s, color 0.2s;
+            margin-bottom: 5px;
         }
 
-        .install-prompt-close:hover {
-            background-color: #f0f0f0;
-            color: #333;
-        }
-
-        .install-prompt-header {
-            text-align: center;
-            padding: 32px 24px 16px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .install-prompt-icon {
-            font-size: 48px;
-            display: block;
-            margin-bottom: 12px;
-        }
-
-        .install-prompt-header h2 {
-            margin: 0;
-            font-size: 24px;
-            color: #333;
-            font-weight: 600;
-        }
-
-        .install-prompt-body {
-            padding: 24px;
-        }
-
-        .install-prompt-intro {
-            font-size: 16px;
-            line-height: 1.5;
-            color: #555;
-            margin: 0 0 16px 0;
-            text-align: center;
-        }
-
-        .install-prompt-note {
-            background-color: #fff3cd;
-            border: 1px solid #ffc107;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 16px;
+        .header p {
             font-size: 14px;
-            color: #856404;
-            line-height: 1.4;
+            opacity: 0.9;
         }
 
-        .install-prompt-steps {
-            margin-bottom: 20px;
+        /* Tab Navigation */
+        .tabs {
+            display: flex;
+            background: white;
+            border-bottom: 2px solid #e0e0e0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        .install-prompt-steps h3 {
-            font-size: 18px;
-            color: #333;
-            margin: 0 0 12px 0;
-            font-weight: 600;
-        }
-
-        .install-prompt-steps ol {
-            margin: 0;
-            padding-left: 24px;
-            color: #555;
-        }
-
-        .install-prompt-steps ol li {
-            margin-bottom: 10px;
-            line-height: 1.5;
-            font-size: 15px;
-        }
-
-        .install-prompt-benefits {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 16px;
-            margin-top: 16px;
-        }
-
-        .install-prompt-benefits h3 {
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: white;
             font-size: 16px;
-            color: #333;
-            margin: 0 0 10px 0;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
             font-weight: 600;
         }
 
-        .install-prompt-benefits ul {
-            margin: 0;
-            padding: 0;
+        .tab:hover {
+            background: #f8f9fa;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* Lists */
+        .list {
             list-style: none;
         }
 
-        .install-prompt-benefits ul li {
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: #555;
-            line-height: 1.4;
+        .list-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .install-prompt-button-primary {
-            width: 100%;
-            padding: 14px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
+        .list-item-content {
+            flex: 1;
+        }
+
+        .list-item-content h3 {
             font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin: 16px 0;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .install-prompt-button-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .install-prompt-footer {
-            padding: 16px 24px 24px;
-            text-align: center;
-        }
-
-        .install-prompt-button-secondary {
-            background: transparent;
-            border: 2px solid #ddd;
-            color: #666;
-            padding: 10px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: border-color 0.2s, color 0.2s;
-        }
-
-        .install-prompt-button-secondary:hover {
-            border-color: #999;
+            margin-bottom: 5px;
             color: #333;
         }
 
+        .list-item-content p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .list-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Invoice Items Table */
+        .invoice-items {
+            margin-top: 20px;
+        }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: end;
+        }
+
+        .item-row input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .total-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .total-section h3 {
+            font-size: 20px;
+            color: #333;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        /* Hide class */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Mobile Responsive */
         @media (max-width: 600px) {
-            .install-prompt-overlay {
-                padding: 0;
+            .item-row {
+                grid-template-columns: 1fr;
             }
-            .install-prompt-container {
-                max-width: 100%;
-                max-height: 100vh;
-                border-radius: 0;
+
+            .list-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .list-item-actions {
+                margin-top: 10px;
+                width: 100%;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Your Invoice App Goes Here -->
-    <div class="app-container">
-        <header>
-            <h1>🏡 Owensboro Mowing Company</h1>
-            <p>Invoice Management System</p>
-        </header>
+    <!-- Header -->
+    <div class="header">
+        <h1>🏡 Owensboro Mowing Company</h1>
+        <p>Invoice Management System</p>
+    </div>
 
-        <div class="content">
-            <h2>Welcome!</h2>
-            <p>This app works directly in your browser - no downloads required!</p>
-            <p style="margin-top: 16px;">
-                <strong>Optional:</strong> You can install it on your phone or computer for quick access,
-                but it's completely optional. Just click "Maybe Later" if you prefer to use it in your browser.
-            </p>
+    <!-- Tab Navigation -->
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('clients')">📋 Clients</button>
+        <button class="tab" onclick="switchTab('invoices')">💰 Invoices</button>
+        <button class="tab" onclick="switchTab('settings')">⚙️ Settings</button>
+    </div>
 
-            <!-- Your app content goes here -->
+    <!-- Clients Tab -->
+    <div id="clients-tab" class="tab-content active">
+        <div class="card">
+            <h2>Add New Client</h2>
+            <form id="client-form">
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="client-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" id="client-phone">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="client-email">
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <textarea id="client-address" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Client</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>My Clients</h2>
+            <ul id="clients-list" class="list"></ul>
         </div>
     </div>
 
-    <!-- PWA Install Prompt (shows automatically on first visit) -->
-    <div id="installPrompt" class="install-prompt-overlay">
-        <div class="install-prompt-container">
-            <button class="install-prompt-close" onclick="dismissInstallPrompt()" aria-label="Close">✕</button>
-
-            <div class="install-prompt-header">
-                <span class="install-prompt-icon" id="platformIcon">📱</span>
-                <h2 id="installTitle">Install App</h2>
-            </div>
-
-            <div class="install-prompt-body">
-                <p class="install-prompt-intro">
-                    <strong>Installation is 100% optional!</strong><br>
-                    Use the app directly in your browser, or install it for quick access.
-                </p>
-
-                <div id="browserNote" class="install-prompt-note" style="display: none;"></div>
-
-                <div class="install-prompt-steps">
-                    <h3>Installation Steps:</h3>
-                    <ol id="installSteps"></ol>
+    <!-- Invoices Tab -->
+    <div id="invoices-tab" class="tab-content">
+        <div class="card">
+            <h2>Create New Invoice</h2>
+            <form id="invoice-form">
+                <div class="form-group">
+                    <label>Select Client *</label>
+                    <select id="invoice-client" required>
+                        <option value="">-- Select a client --</option>
+                    </select>
                 </div>
 
-                <button id="installButton" class="install-prompt-button-primary" style="display: none;">
-                    Install Now
-                </button>
-
-                <div class="install-prompt-benefits">
-                    <h3>Benefits of Installing:</h3>
-                    <ul>
-                        <li>✓ Quick access from your home screen</li>
-                        <li>✓ Works offline (no internet needed)</li>
-                        <li>✓ Faster loading</li>
-                        <li>✓ No app store required</li>
-                    </ul>
+                <div class="invoice-items">
+                    <h3>Line Items</h3>
+                    <div id="items-container"></div>
+                    <button type="button" class="btn btn-secondary" onclick="addLineItem()">+ Add Item</button>
                 </div>
-            </div>
 
-            <div class="install-prompt-footer">
-                <button class="install-prompt-button-secondary" onclick="dismissInstallPrompt()">
-                    Maybe Later - Use in Browser
-                </button>
+                <div class="total-section">
+                    <h3>Total: $<span id="invoice-total">0.00</span></h3>
+                </div>
+
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-primary">Create Invoice</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Recent Invoices</h2>
+            <ul id="invoices-list" class="list"></ul>
+        </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div id="settings-tab" class="tab-content">
+        <div class="card">
+            <h2>Business Information</h2>
+            <div class="form-group">
+                <label>Business Name</label>
+                <p style="padding: 10px; background: #f8f9fa; border-radius: 6px;">Owensboro Mowing Company</p>
+            </div>
+            <div class="form-group">
+                <label>Address</label>
+                <p style="padding: 10px; background: #f8f9fa; border-radius: 6px;">Owensboro, Kentucky 42303</p>
+            </div>
+            <div class="form-group">
+                <label>Phone</label>
+                <p style="padding: 10px; background: #f8f9fa; border-radius: 6px;">270.222.9613 or 270.499.7758</p>
+            </div>
+            <div class="form-group">
+                <label>Website</label>
+                <p style="padding: 10px; background: #f8f9fa; border-radius: 6px;">owensboromowingcompany.com</p>
+            </div>
+            <div class="form-group">
+                <label>EIN</label>
+                <p style="padding: 10px; background: #f8f9fa; border-radius: 6px;">93-2058075</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Data Management</h2>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button class="btn btn-secondary" onclick="exportData()">📥 Export All Data</button>
+                <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">📤 Import Data</button>
+                <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importData(event)">
+                <button class="btn btn-danger" onclick="clearAllData()">🗑️ Clear All Data</button>
             </div>
         </div>
     </div>
 
     <script>
-        // PWA Detection and Install Prompt Logic
-        let deferredPrompt = null;
+        // IndexedDB Setup
+        const DB_NAME = 'InvoiceAppDB';
+        const DB_VERSION = 1;
+        let db;
 
-        // Check if running as PWA
-        function isPWA() {
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-            const isIOSStandalone = window.navigator.standalone === true;
-            return isStandalone || isIOSStandalone;
-        }
+        // Initialize Database
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-        // Detect platform
-        function getPlatform() {
-            const userAgent = window.navigator.userAgent.toLowerCase();
-            if (/iphone|ipad|ipod/.test(userAgent)) return 'ios';
-            if (/android/.test(userAgent)) return 'android';
-            return 'desktop';
-        }
-
-        // Detect browser
-        function getBrowser() {
-            const userAgent = window.navigator.userAgent.toLowerCase();
-            if (/safari/.test(userAgent) && !/chrome/.test(userAgent)) return 'safari';
-            if (/chrome/.test(userAgent)) return 'chrome';
-            if (/firefox/.test(userAgent)) return 'firefox';
-            if (/edg/.test(userAgent)) return 'edge';
-            return 'other';
-        }
-
-        // Check if should show prompt
-        function shouldShowInstallPrompt() {
-            if (isPWA()) return false;
-
-            const dismissedAt = localStorage.getItem('pwaPromptDismissed');
-            if (dismissedAt) {
-                const daysSinceDismissed = (Date.now() - parseInt(dismissedAt)) / (1000 * 60 * 60 * 24);
-                if (daysSinceDismissed < 7) return false;
-            }
-
-            return true;
-        }
-
-        // Get platform-specific instructions
-        function getInstallInstructions() {
-            const platform = getPlatform();
-            const browser = getBrowser();
-
-            if (platform === 'ios') {
-                return {
-                    icon: '🍎',
-                    title: 'Install on iPhone/iPad',
-                    steps: [
-                        'Tap the Share button (square with arrow) at the bottom of Safari',
-                        'Scroll down and tap "Add to Home Screen"',
-                        'Tap "Add" in the top right corner',
-                        'The app icon will appear on your home screen'
-                    ],
-                    note: browser !== 'safari' ? '⚠️ Installation only works in Safari browser on iOS. Please open this page in Safari.' : null
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
                 };
-            }
 
-            if (platform === 'android') {
-                return {
-                    icon: '🤖',
-                    title: 'Install on Android',
-                    steps: [
-                        'Tap the menu button (three dots) in the top right corner',
-                        'Tap "Install App" or "Add to Home Screen"',
-                        'Tap "Install" in the popup',
-                        'The app icon will appear on your home screen'
-                    ],
-                    note: browser !== 'chrome' ? '⚠️ Installation works best in Chrome browser on Android.' : null
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+
+                    if (!db.objectStoreNames.contains('clients')) {
+                        db.createObjectStore('clients', { keyPath: 'id', autoIncrement: true });
+                    }
+
+                    if (!db.objectStoreNames.contains('invoices')) {
+                        const invoiceStore = db.createObjectStore('invoices', { keyPath: 'id', autoIncrement: true });
+                        invoiceStore.createIndex('clientId', 'clientId', { unique: false });
+                    }
                 };
-            }
+            });
+        }
 
-            return {
-                icon: '💻',
-                title: 'Install on Desktop',
-                steps: [
-                    'Click the install icon in the address bar (or menu)',
-                    'Click "Install" in the popup',
-                    'The app will open in its own window',
-                    'Find it in your apps menu or taskbar'
-                ],
-                note: null
+        // Helper function for transactions
+        function performTransaction(storeName, mode, operation) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(storeName, mode);
+                const store = transaction.objectStore(storeName);
+                const request = operation(store);
+
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // Client Operations
+        async function addClient(client) {
+            return performTransaction('clients', 'readwrite', store => store.add(client));
+        }
+
+        async function getAllClients() {
+            return performTransaction('clients', 'readonly', store => store.getAll());
+        }
+
+        async function deleteClient(id) {
+            return performTransaction('clients', 'readwrite', store => store.delete(id));
+        }
+
+        // Invoice Operations
+        async function addInvoice(invoice) {
+            return performTransaction('invoices', 'readwrite', store => store.add(invoice));
+        }
+
+        async function getAllInvoices() {
+            return performTransaction('invoices', 'readonly', store => store.getAll());
+        }
+
+        async function deleteInvoice(id) {
+            return performTransaction('invoices', 'readwrite', store => store.delete(id));
+        }
+
+        // Tab Switching
+        function switchTab(tabName) {
+            // Remove active from all tabs and contents
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            // Add active to selected
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+
+            // Refresh data
+            if (tabName === 'clients') loadClients();
+            if (tabName === 'invoices') {
+                loadInvoices();
+                loadClientSelect();
+            }
+        }
+
+        // Client Form Submission
+        document.getElementById('client-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const client = {
+                name: document.getElementById('client-name').value,
+                phone: document.getElementById('client-phone').value,
+                email: document.getElementById('client-email').value,
+                address: document.getElementById('client-address').value,
+                createdAt: new Date().toISOString()
             };
+
+            await addClient(client);
+            e.target.reset();
+            loadClients();
+            alert('Client added successfully!');
+        });
+
+        // Load and Display Clients
+        async function loadClients() {
+            const clients = await getAllClients();
+            const list = document.getElementById('clients-list');
+
+            if (clients.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><p>No clients yet. Add your first client above!</p></div>';
+                return;
+            }
+
+            list.innerHTML = clients.map(client => `
+                <li class="list-item">
+                    <div class="list-item-content">
+                        <h3>${client.name}</h3>
+                        <p>${client.phone || 'No phone'} • ${client.email || 'No email'}</p>
+                        ${client.address ? `<p>${client.address}</p>` : ''}
+                    </div>
+                    <div class="list-item-actions">
+                        <button class="btn btn-danger btn-small" onclick="removeClient(${client.id})">Delete</button>
+                    </div>
+                </li>
+            `).join('');
         }
 
-        // Show install prompt
-        function showInstallPrompt() {
-            if (!shouldShowInstallPrompt()) return;
+        async function removeClient(id) {
+            if (confirm('Are you sure you want to delete this client?')) {
+                await deleteClient(id);
+                loadClients();
+            }
+        }
 
-            const instructions = getInstallInstructions();
-            const platform = getPlatform();
+        // Load clients into invoice select
+        async function loadClientSelect() {
+            const clients = await getAllClients();
+            const select = document.getElementById('invoice-client');
 
-            document.getElementById('platformIcon').textContent = instructions.icon;
-            document.getElementById('installTitle').textContent = instructions.title;
+            select.innerHTML = '<option value="">-- Select a client --</option>' +
+                clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
 
-            const stepsList = document.getElementById('installSteps');
-            stepsList.innerHTML = '';
-            instructions.steps.forEach(step => {
-                const li = document.createElement('li');
-                li.textContent = step;
-                stepsList.appendChild(li);
+        // Line Items Management
+        let itemCount = 0;
+
+        function addLineItem() {
+            itemCount++;
+            const container = document.getElementById('items-container');
+            const itemRow = document.createElement('div');
+            itemRow.className = 'item-row';
+            itemRow.id = 'item-' + itemCount;
+            itemRow.innerHTML = `
+                <input type="text" placeholder="Description" class="item-desc" required>
+                <input type="number" placeholder="Qty" class="item-qty" value="1" min="1" required>
+                <input type="number" placeholder="Price" class="item-price" value="0" step="0.01" min="0" required>
+                <input type="text" class="item-total" value="$0.00" readonly>
+                <button type="button" class="btn btn-danger btn-small" onclick="removeLineItem(${itemCount})">×</button>
+            `;
+
+            container.appendChild(itemRow);
+
+            // Add event listeners for calculation
+            itemRow.querySelector('.item-qty').addEventListener('input', calculateTotal);
+            itemRow.querySelector('.item-price').addEventListener('input', calculateTotal);
+        }
+
+        function removeLineItem(id) {
+            document.getElementById('item-' + id).remove();
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            document.querySelectorAll('.item-row').forEach(row => {
+                const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+                const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                const itemTotal = qty * price;
+
+                row.querySelector('.item-total').value = '$' + itemTotal.toFixed(2);
+                total += itemTotal;
             });
 
-            if (instructions.note) {
-                document.getElementById('browserNote').textContent = instructions.note;
-                document.getElementById('browserNote').style.display = 'block';
-            }
-
-            if (deferredPrompt && platform !== 'ios') {
-                document.getElementById('installButton').style.display = 'block';
-            }
-
-            document.getElementById('installPrompt').classList.add('show');
+            document.getElementById('invoice-total').textContent = total.toFixed(2);
         }
 
-        // Dismiss install prompt
-        function dismissInstallPrompt() {
-            localStorage.setItem('pwaPromptDismissed', Date.now().toString());
-            document.getElementById('installPrompt').classList.remove('show');
-        }
-
-        // Trigger native install
-        async function triggerInstall() {
-            if (!deferredPrompt) return;
-
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-
-            if (outcome === 'accepted') {
-                dismissInstallPrompt();
-            }
-
-            deferredPrompt = null;
-        }
-
-        // Listen for beforeinstallprompt event
-        window.addEventListener('beforeinstallprompt', (e) => {
+        // Invoice Form Submission
+        document.getElementById('invoice-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            deferredPrompt = e;
-            showInstallPrompt();
+
+            const clientId = parseInt(document.getElementById('invoice-client').value);
+            if (!clientId) {
+                alert('Please select a client');
+                return;
+            }
+
+            const items = [];
+            document.querySelectorAll('.item-row').forEach(row => {
+                items.push({
+                    description: row.querySelector('.item-desc').value,
+                    quantity: parseFloat(row.querySelector('.item-qty').value),
+                    price: parseFloat(row.querySelector('.item-price').value)
+                });
+            });
+
+            if (items.length === 0) {
+                alert('Please add at least one item');
+                return;
+            }
+
+            const total = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+
+            const invoice = {
+                clientId,
+                items,
+                total,
+                createdAt: new Date().toISOString(),
+                status: 'draft'
+            };
+
+            const invoiceId = await addInvoice(invoice);
+
+            // Generate PDF
+            await generatePDF(invoice, invoiceId);
+
+            // Reset form
+            e.target.reset();
+            document.getElementById('items-container').innerHTML = '';
+            itemCount = 0;
+            calculateTotal();
+
+            loadInvoices();
+            alert('Invoice created and PDF generated!');
         });
 
-        // Show prompt on load
-        window.addEventListener('load', () => {
-            // Delay showing prompt by 2 seconds to not overwhelm users
-            setTimeout(showInstallPrompt, 2000);
-        });
+        // Load and Display Invoices
+        async function loadInvoices() {
+            const invoices = await getAllInvoices();
+            const clients = await getAllClients();
+            const list = document.getElementById('invoices-list');
 
-        // Install button click handler
-        document.getElementById('installButton').addEventListener('click', triggerInstall);
+            if (invoices.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💰</div><p>No invoices yet. Create your first invoice above!</p></div>';
+                return;
+            }
+
+            list.innerHTML = invoices.map(invoice => {
+                const client = clients.find(c => c.id === invoice.clientId);
+                const date = new Date(invoice.createdAt).toLocaleDateString();
+
+                return `
+                    <li class="list-item">
+                        <div class="list-item-content">
+                            <h3>${client ? client.name : 'Unknown Client'}</h3>
+                            <p>Date: ${date} • Items: ${invoice.items.length} • Total: $${invoice.total.toFixed(2)}</p>
+                        </div>
+                        <div class="list-item-actions">
+                            <button class="btn btn-primary btn-small" onclick="viewInvoice(${invoice.id})">View PDF</button>
+                            <button class="btn btn-danger btn-small" onclick="removeInvoice(${invoice.id})">Delete</button>
+                        </div>
+                    </li>
+                `;
+            }).join('');
+        }
+
+        async function removeInvoice(id) {
+            if (confirm('Are you sure you want to delete this invoice?')) {
+                await deleteInvoice(id);
+                loadInvoices();
+            }
+        }
+
+        async function viewInvoice(id) {
+            const invoices = await getAllInvoices();
+            const invoice = invoices.find(inv => inv.id === id);
+            if (invoice) {
+                await generatePDF(invoice, id);
+            }
+        }
+
+        // PDF Generation
+        async function generatePDF(invoice, invoiceId) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const clients = await getAllClients();
+            const client = clients.find(c => c.id === invoice.clientId);
+
+            // Header
+            doc.setFontSize(20);
+            doc.text('INVOICE', 105, 20, { align: 'center' });
+
+            // Business Info
+            doc.setFontSize(10);
+            doc.text('Owensboro Mowing Company', 20, 40);
+            doc.text('Owensboro, Kentucky 42303', 20, 46);
+            doc.text('270.222.9613 or 270.499.7758', 20, 52);
+            doc.text('owensboromowingcompany.com', 20, 58);
+            doc.text('EIN: 93-2058075', 20, 64);
+
+            // Invoice Info
+            doc.text(`Invoice #: ${invoiceId}`, 140, 40);
+            doc.text(`Date: ${new Date(invoice.createdAt).toLocaleDateString()}`, 140, 46);
+
+            // Client Info
+            doc.setFontSize(12);
+            doc.text('Bill To:', 20, 80);
+            doc.setFontSize(10);
+            if (client) {
+                doc.text(client.name, 20, 88);
+                if (client.address) doc.text(client.address, 20, 94);
+                if (client.phone) doc.text(client.phone, 20, 100);
+                if (client.email) doc.text(client.email, 20, 106);
+            }
+
+            // Items Table
+            let y = 120;
+            doc.setFontSize(10);
+            doc.text('Description', 20, y);
+            doc.text('Qty', 120, y);
+            doc.text('Price', 145, y);
+            doc.text('Total', 170, y);
+
+            doc.line(20, y + 2, 190, y + 2);
+            y += 10;
+
+            invoice.items.forEach(item => {
+                doc.text(item.description, 20, y);
+                doc.text(item.quantity.toString(), 120, y);
+                doc.text('$' + item.price.toFixed(2), 145, y);
+                doc.text('$' + (item.quantity * item.price).toFixed(2), 170, y);
+                y += 8;
+            });
+
+            // Total
+            doc.line(20, y, 190, y);
+            y += 10;
+            doc.setFontSize(12);
+            doc.text('TOTAL:', 140, y);
+            doc.text('$' + invoice.total.toFixed(2), 170, y);
+
+            // Save or open
+            doc.save(`invoice-${invoiceId}.pdf`);
+        }
+
+        // Data Export/Import
+        async function exportData() {
+            const clients = await getAllClients();
+            const invoices = await getAllInvoices();
+
+            const data = {
+                version: 1,
+                exportDate: new Date().toISOString(),
+                clients,
+                invoices
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `invoice-app-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        async function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+
+                    if (confirm('This will replace all existing data. Continue?')) {
+                        // Clear existing data
+                        const clientTx = db.transaction('clients', 'readwrite');
+                        await clientTx.objectStore('clients').clear();
+
+                        const invoiceTx = db.transaction('invoices', 'readwrite');
+                        await invoiceTx.objectStore('invoices').clear();
+
+                        // Import new data
+                        for (const client of data.clients) {
+                            await addClient(client);
+                        }
+                        for (const invoice of data.invoices) {
+                            await addInvoice(invoice);
+                        }
+
+                        alert('Data imported successfully!');
+                        loadClients();
+                        loadInvoices();
+                    }
+                } catch (error) {
+                    alert('Error importing data: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        async function clearAllData() {
+            if (confirm('Are you sure you want to delete ALL data? This cannot be undone!')) {
+                if (confirm('Really sure? This will delete all clients and invoices!')) {
+                    const clientTx = db.transaction('clients', 'readwrite');
+                    await clientTx.objectStore('clients').clear();
+
+                    const invoiceTx = db.transaction('invoices', 'readwrite');
+                    await invoiceTx.objectStore('invoices').clear();
+
+                    alert('All data cleared!');
+                    loadClients();
+                    loadInvoices();
+                }
+            }
+        }
+
+        // Initialize App
+        async function initApp() {
+            await initDB();
+            loadClients();
+            loadInvoices();
+            loadClientSelect();
+
+            // Add first line item
+            addLineItem();
+        }
+
+        // Start app when page loads
+        window.addEventListener('load', initApp);
 
         // Register service worker
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
-                    .then(registration => {
-                        console.log('Service Worker registered successfully:', registration);
-                    })
-                    .catch(error => {
-                        console.log('Service Worker registration failed:', error);
-                    });
-            });
+            navigator.serviceWorker.register('service-worker.js')
+                .then(reg => console.log('Service Worker registered'))
+                .catch(err => console.log('Service Worker registration failed'));
         }
     </script>
 </body>
