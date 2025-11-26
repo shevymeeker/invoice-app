@@ -2,7 +2,7 @@
   "name": "Owensboro Mowing Company Invoice App",
   "short_name": "OMC Invoices",
   "description": "Simple, offline-capable invoice manager for Owensboro Mowing Company",
-  "start_url": "/",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2d3748",
