@@ -1,25 +1,24 @@
 /**
  * Service Worker for Offline Functionality
  * Owensboro Mowing Company Invoice App
- * FIXED: Added PDF Library caching & Relative Paths
+ * FIXED: Caches PDF Engine & Your Specific Icon
  */
 
-const CACHE_NAME = 'omc-invoice-app-v2'; // Incremented version to force update
+const CACHE_NAME = 'omc-invoice-app-v3'; // Version up to force refresh
 
-// ⚠️ CRITICAL: We added the PDF library here so it works offline
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
-  './icons/icon-192x192.png', 
-  './icons/icon-512x512.png',
-  // The Engine that generates PDFs (MUST BE CACHED)
+  // This is the exact filename you uploaded:
+  './icon-watchos-129x129@2x.png', 
+  // The PDF Engine
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js' 
 ];
 
 // Install event - cache essential files
 self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Installing & Caching PDF Engine...');
+  console.log('[Service Worker] Installing & Caching Assets...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
