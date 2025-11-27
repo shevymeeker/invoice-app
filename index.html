@@ -625,63 +625,285 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const client = await getClient(invoice.clientId);
-            doc.setFontSize(20);
-            doc.text('INVOICE', 105, 20, { align: 'center' });
+
+            // Colors
+            const primaryColor = [90, 90, 90]; // #5a5a5a
+            const accentColor = [16, 185, 129]; // Green accent
+            const lightGray = [245, 245, 245];
+            const darkText = [0, 0, 0];
+
+            let y = 15;
+
+            // ====== 1. HEADER / TOP BAR ======
+            doc.setFillColor(...primaryColor);
+            doc.rect(0, 0, 210, 35, 'F');
+
+            // Company Name (Top Left)
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            doc.text('OWENSBORO MOWING COMPANY', 15, 15);
+
+            // Tagline
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            doc.text('Grounds Maintenance & Property Cleanup', 15, 21);
+
+            // INVOICE title (Top Right)
+            doc.setFontSize(24);
+            doc.setFont(undefined, 'bold');
+            doc.text('INVOICE', 195, 18, { align: 'right' });
+
+            // Invoice number below
             doc.setFontSize(10);
-            doc.text('Owensboro Mowing Company', 20, 40);
-            doc.text('Owensboro, Kentucky 42303', 20, 46);
-            doc.text('270.222.9613 or 270.499.7758', 20, 52);
-            doc.text('owensboromowingcompany.com', 20, 58);
-            doc.text('EIN: 93-2058075', 20, 64);
-            doc.text(`Invoice #: ${invoiceId}`, 140, 40);
-            doc.text(`Date: ${new Date(invoice.createdAt).toLocaleDateString()}`, 140, 46);
-            if (invoice.dueDate) {
-                doc.text(`Due Date: ${new Date(invoice.dueDate).toLocaleDateString()}`, 140, 52);
-            }
-            doc.setFontSize(12);
-            doc.text('Bill To:', 20, 80);
+            doc.setFont(undefined, 'normal');
+            doc.text(`#${String(invoiceId).padStart(4, '0')}`, 195, 26, { align: 'right' });
+
+            // Reset text color
+            doc.setTextColor(...darkText);
+            y = 45;
+
+            // ====== 2. YOUR BUSINESS INFO (Left) & 3. INVOICE METADATA (Right) ======
+            // Left column - Business info
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'bold');
+            doc.text('FROM:', 15, y);
+            doc.setFont(undefined, 'normal');
+            y += 5;
             doc.setFontSize(10);
-            if (client) {
-                doc.text(client.name, 20, 88);
-                if (client.address) doc.text(client.address, 20, 94);
-                if (client.phone) doc.text(client.phone, 20, 100);
-                if (client.email) doc.text(client.email, 20, 106);
-            }
-            let y = 120;
-            doc.text('Description', 20, y);
-            doc.text('Qty', 120, y);
-            doc.text('Price', 145, y);
-            doc.text('Total', 170, y);
-            doc.line(20, y + 2, 190, y + 2);
-            y += 10;
-            invoice.items.forEach(item => {
-                doc.text(item.description, 20, y);
-                doc.text(item.quantity.toString(), 120, y);
-                doc.text('$' + item.price.toFixed(2), 145, y);
-                doc.text('$' + (item.quantity * item.price).toFixed(2), 170, y);
-                y += 8;
-            });
-            doc.line(20, y, 190, y);
-            y += 10;
-            doc.setFontSize(12);
-            doc.text('TOTAL:', 140, y);
-            doc.text('$' + invoice.total.toFixed(2), 170, y);
-            y += 15;
+            doc.text('Owensboro Mowing Company', 15, y);
+            y += 5;
+            doc.setFontSize(9);
+            doc.text('Owensboro, Kentucky 42303', 15, y);
+            y += 4;
+            doc.text('Phone: 270.222.9613 or 270.499.7758', 15, y);
+            y += 4;
+            doc.text('Web: owensboromowingcompany.com', 15, y);
+            y += 4;
+            doc.text('EIN: 93-2058075', 15, y);
+
+            // Right column - Invoice metadata
+            const rightX = 120;
+            let rightY = 45;
+            doc.setFontSize(9);
+
+            // Invoice Date
+            doc.setFont(undefined, 'bold');
+            doc.text('Invoice Date:', rightX, rightY);
+            doc.setFont(undefined, 'normal');
+            doc.text(new Date(invoice.createdAt).toLocaleDateString('en-US', {
+                year: 'numeric', month: 'short', day: 'numeric'
+            }), rightX + 30, rightY);
+            rightY += 5;
+
+            // Due Date
+            doc.setFont(undefined, 'bold');
+            const dueDate = invoice.dueDate ? new Date(invoice.dueDate) : new Date(new Date(invoice.createdAt).getTime() + 15 * 24 * 60 * 60 * 1000);
+            doc.text('Due Date:', rightX, rightY);
+            doc.setFont(undefined, 'normal');
+            doc.text(dueDate.toLocaleDateString('en-US', {
+                year: 'numeric', month: 'short', day: 'numeric'
+            }), rightX + 30, rightY);
+            rightY += 5;
+
+            // Payment Terms
+            doc.setFont(undefined, 'bold');
+            doc.text('Terms:', rightX, rightY);
+            doc.setFont(undefined, 'normal');
+            doc.text('Net 15', rightX + 30, rightY);
+
+            y = 75;
+
+            // ====== 4. BILL TO SECTION ======
+            doc.setFillColor(...lightGray);
+            doc.rect(15, y, 180, 8, 'F');
+
             doc.setFontSize(10);
             doc.setFont(undefined, 'bold');
-            doc.text('Payment Methods:', 20, y);
+            doc.text('BILL TO:', 17, y + 5.5);
+            y += 12;
+
+            if (client) {
+                doc.setFontSize(11);
+                doc.setFont(undefined, 'bold');
+                doc.text(client.name, 17, y);
+                y += 5;
+
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'normal');
+
+                if (client.address) {
+                    // Handle multi-line addresses
+                    const addressLines = doc.splitTextToSize(client.address, 80);
+                    addressLines.forEach(line => {
+                        doc.text(line, 17, y);
+                        y += 4;
+                    });
+                }
+
+                if (client.phone) {
+                    doc.text(`Phone: ${client.phone}`, 17, y);
+                    y += 4;
+                }
+
+                if (client.email) {
+                    doc.text(`Email: ${client.email}`, 17, y);
+                    y += 4;
+                }
+            }
+
+            y += 8;
+
+            // ====== 5. LINE ITEMS TABLE ======
+            // Table header
+            doc.setFillColor(...primaryColor);
+            doc.rect(15, y, 180, 8, 'F');
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'bold');
+            doc.text('DESCRIPTION', 17, y + 5.5);
+            doc.text('QTY', 135, y + 5.5, { align: 'center' });
+            doc.text('RATE', 158, y + 5.5, { align: 'right' });
+            doc.text('AMOUNT', 190, y + 5.5, { align: 'right' });
+
+            doc.setTextColor(...darkText);
+            y += 12;
+
+            // Table rows
+            let rowColor = true;
+            invoice.items.forEach((item, index) => {
+                // Alternating row colors
+                if (rowColor) {
+                    doc.setFillColor(250, 250, 250);
+                    doc.rect(15, y - 4, 180, 8, 'F');
+                }
+                rowColor = !rowColor;
+
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'normal');
+
+                // Description (with text wrapping if needed)
+                const descLines = doc.splitTextToSize(item.description, 110);
+                doc.text(descLines[0], 17, y);
+
+                // Qty
+                doc.text(item.quantity.toString(), 135, y, { align: 'center' });
+
+                // Rate
+                doc.text(`$${item.price.toFixed(2)}`, 158, y, { align: 'right' });
+
+                // Amount
+                doc.setFont(undefined, 'bold');
+                doc.text(`$${(item.quantity * item.price).toFixed(2)}`, 190, y, { align: 'right' });
+
+                y += 8;
+
+                // Handle multi-line descriptions
+                if (descLines.length > 1) {
+                    doc.setFont(undefined, 'normal');
+                    for (let i = 1; i < descLines.length; i++) {
+                        doc.text(descLines[i], 17, y);
+                        y += 4;
+                    }
+                }
+            });
+
+            // Bottom border of table
+            doc.setDrawColor(200, 200, 200);
+            doc.line(15, y, 195, y);
+            y += 8;
+
+            // ====== 6. TOTALS SECTION ======
+            const totalsX = 140;
+
+            // Subtotal
+            doc.setFontSize(10);
             doc.setFont(undefined, 'normal');
+            doc.text('Subtotal:', totalsX, y);
+            doc.text(`$${invoice.total.toFixed(2)}`, 190, y, { align: 'right' });
             y += 6;
-            doc.text('Cash (Preferred)', 20, y);
-            y += 6;
-            doc.text('Cash App', 20, y);
-            y += 6;
-            doc.text('Venmo', 20, y);
-            y += 15;
+
+            // Tax (0% for lawn services typically)
+            doc.text('Sales Tax (0%):', totalsX, y);
+            doc.text('$0.00', 190, y, { align: 'right' });
+            y += 8;
+
+            // Grand Total - highlighted box
+            doc.setFillColor(...accentColor);
+            doc.rect(138, y - 5, 57, 10, 'F');
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('TOTAL DUE:', totalsX + 2, y + 1.5);
+            doc.text(`$${invoice.total.toFixed(2)}`, 188, y + 1.5, { align: 'right' });
+
+            doc.setTextColor(...darkText);
+            y += 18;
+
+            // ====== 7. PAYMENT TERMS & METHODS ======
+            doc.setFillColor(...lightGray);
+            doc.rect(15, y, 85, 35, 'F');
+
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'bold');
+            doc.text('PAYMENT DETAILS', 17, y + 5);
+
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            y += 10;
+            doc.text('Accepted Payment Methods:', 17, y);
+            y += 5;
+            doc.text('• Cash (Preferred)', 20, y);
+            y += 4;
+            doc.text('• Cash App', 20, y);
+            y += 4;
+            doc.text('• Venmo', 20, y);
+            y += 4;
+            doc.text('• Check (payable to: Owensboro Mowing Co.)', 20, y);
+
+            // Terms box on the right
+            y -= 17;
+            doc.setFillColor(...lightGray);
+            doc.rect(105, y - 5, 90, 35, 'F');
+
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'bold');
+            doc.text('PAYMENT TERMS', 107, y);
+
+            doc.setFontSize(8);
+            doc.setFont(undefined, 'normal');
+            y += 5;
+            doc.text('Payment is due within 15 days of invoice date.', 107, y);
+            y += 4;
+            doc.text('A late fee of 5% may be added to balances', 107, y);
+            y += 3.5;
+            doc.text('more than 10 days past due.', 107, y);
+            y += 5;
+            doc.setFont(undefined, 'italic');
+            doc.text('Questions? Contact us at 270.222.9613', 107, y);
+
+            y += 25;
+
+            // ====== 8. THANK YOU NOTE ======
             doc.setFontSize(11);
             doc.setFont(undefined, 'italic');
             doc.text('Thank you for your business!', 105, y, { align: 'center' });
-            doc.save(`invoice-${invoiceId}.pdf`);
+            y += 5;
+            doc.setFontSize(8);
+            doc.setFont(undefined, 'normal');
+            doc.text('We appreciate the opportunity to serve you.', 105, y, { align: 'center' });
+
+            // ====== 9. FOOTER / SMALL PRINT ======
+            doc.setFontSize(7);
+            doc.setTextColor(100, 100, 100);
+            doc.text('This invoice was generated electronically and is valid without a signature.', 105, 285, { align: 'center' });
+
+            // Save with better filename
+            const dateStr = new Date(invoice.createdAt).toISOString().split('T')[0];
+            const clientName = client ? client.name.replace(/[^a-z0-9]/gi, '_') : 'Client';
+            doc.save(`Invoice_${String(invoiceId).padStart(4, '0')}_${clientName}_${dateStr}.pdf`);
         }
 
         async function exportData() {
