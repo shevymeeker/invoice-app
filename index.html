@@ -79,10 +79,10 @@
     </div>
 
     <div class="tabs">
-        <button class="tab active" onclick="switchTab('clients')">Clients</button>
-        <button class="tab" onclick="switchTab('estimates')">Estimates</button>
-        <button class="tab" onclick="switchTab('invoices')">Invoices</button>
-        <button class="tab" onclick="switchTab('settings')">Settings</button>
+        <button class="tab active" onclick="switchTab(event, 'clients')">Clients</button>
+        <button class="tab" onclick="switchTab(event, 'estimates')">Estimates</button>
+        <button class="tab" onclick="switchTab(event, 'invoices')">Invoices</button>
+        <button class="tab" onclick="switchTab(event, 'settings')">Settings</button>
     </div>
 
     <!-- Clients Tab -->
@@ -267,7 +267,7 @@
         async function updateInvoice(id, data) { return performTransaction('invoices', 'readwrite', store => store.put({...data, id})); }
         async function deleteInvoice(id) { return performTransaction('invoices', 'readwrite', store => store.delete(id)); }
 
-        function switchTab(tabName) {
+        function switchTab(event, tabName) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             event.target.classList.add('active');
@@ -500,7 +500,9 @@
             const invoiceId = await addInvoice(invoice);
             await generatePDF(invoice, invoiceId);
             alert('Invoice created from estimate! PDF generated.');
-            switchTab('invoices');
+            // Switch to invoices tab - need to simulate click event
+            const invoicesTab = document.querySelector('.tabs button:nth-child(3)');
+            if (invoicesTab) invoicesTab.click();
         }
 
         let itemCount = 0;
