@@ -1,0 +1,19 @@
+{
+  "name": "invoice-app",
+  "version": "1.0.0",
+  "description": "Simple, offline-capable invoice manager. Works on any device - **no downloads required!**",
+  "main": "service-worker.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://local_proxy@127.0.0.1:45550/git/shevymeeker/invoice-app"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "jspdf": "^2.5.1"
+  }
+}
