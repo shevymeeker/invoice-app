@@ -4,16 +4,16 @@
  * FIXED: Caches PDF Engine & Your Specific Icon
  */
 
-const CACHE_NAME = 'omc-invoice-app-v3'; // Version up to force refresh
+const CACHE_NAME = 'omc-invoice-app-v4'; // Version up to force refresh (v4: offline-first with local jsPDF)
 
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
   // This is the exact filename you uploaded:
-  './icon-watchos-129x129@2x.png', 
-  // The PDF Engine
-  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js' 
+  './icon-watchos-129x129@2x.png',
+  // The PDF Engine (now bundled locally - no internet required!)
+  './vendor/jspdf.umd.min.js'
 ];
 
 // Install event - cache essential files
