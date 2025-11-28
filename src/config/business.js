@@ -10,6 +10,7 @@ export const BUSINESS_INFO = {
   website: 'owensboromowingcompany.com',
   email: '', // Add email if available
   ein: '93-2058075',
+  salesTaxRate: 0.06, // 6% sales tax rate - update this to match your local tax rate
 };
 
 /**
