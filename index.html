@@ -143,7 +143,20 @@
                         <div id="items-container"></div>
                         <button type="button" class="btn" onclick="addLineItem()">Add Item</button>
                     </div>
-                    <div class="total-section"><h3>Total: $<span id="invoice-total">0.00</span></h3></div>
+                    <div class="total-section">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Subtotal:</span>
+                            <span>$<span id="invoice-subtotal">0.00</span></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Sales Tax (<span id="invoice-tax-rate">6</span>%):</span>
+                            <span>$<span id="invoice-tax-amount">0.00</span></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 2px solid #333;">
+                            <h3 style="margin: 0;">Total:</h3>
+                            <h3 style="margin: 0;">$<span id="invoice-total">0.00</span></h3>
+                        </div>
+                    </div>
                     <div style="margin-top: 10px;">
                         <button type="submit" class="btn btn-orange">Create Invoice & Generate PDF</button>
                     </div>
@@ -167,7 +180,11 @@
                     <tr><td style="padding: 4px 0;"><b>Phone:</b></td><td>270.222.9613 or 270.499.7758</td></tr>
                     <tr><td style="padding: 4px 0;"><b>Website:</b></td><td>owensboromowingcompany.com</td></tr>
                     <tr><td style="padding: 4px 0;"><b>EIN:</b></td><td>93-2058075</td></tr>
+                    <tr><td style="padding: 4px 0;"><b>Sales Tax Rate:</b></td><td><span id="current-tax-rate">6.0</span>%</td></tr>
                 </table>
+                <p style="font-size: 10px; margin-top: 10px; color: #666;">
+                    <b>Note:</b> To change the sales tax rate, edit the <code>SALES_TAX_RATE</code> constant in the <code>src/config/business.js</code> file and the <code>SALES_TAX_RATE</code> constant in <code>index.html</code> (line 231).
+                </p>
             </div>
         </div>
         <div class="panel">
@@ -215,6 +232,7 @@
     <script>
         const DB_NAME = 'InvoiceAppDB';
         const DB_VERSION = 2;
+        const SALES_TAX_RATE = 0.06; // 6% sales tax rate - update this to match your local tax rate
         let db;
         let currentClientId = null;
 
@@ -530,14 +548,20 @@
         }
 
         function calculateTotal() {
-            let total = 0;
+            let subtotal = 0;
             document.querySelectorAll('#items-container .item-row').forEach(row => {
                 const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
                 const price = parseFloat(row.querySelector('.item-price').value) || 0;
                 const itemTotal = qty * price;
                 row.querySelector('.item-total').value = '$' + itemTotal.toFixed(2);
-                total += itemTotal;
+                subtotal += itemTotal;
             });
+            const taxAmount = subtotal * SALES_TAX_RATE;
+            const total = subtotal + taxAmount;
+
+            document.getElementById('invoice-subtotal').textContent = subtotal.toFixed(2);
+            document.getElementById('invoice-tax-rate').textContent = (SALES_TAX_RATE * 100).toFixed(0);
+            document.getElementById('invoice-tax-amount').textContent = taxAmount.toFixed(2);
             document.getElementById('invoice-total').textContent = total.toFixed(2);
         }
 
@@ -556,8 +580,21 @@
                 });
             });
             if (items.length === 0) { alert('Add at least one item'); return; }
-            const total = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
-            const invoice = { clientId, estimateId: null, items, total, createdAt: new Date().toISOString(), dueDate, status: 'draft' };
+            const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+            const taxAmount = subtotal * SALES_TAX_RATE;
+            const total = subtotal + taxAmount;
+            const invoice = {
+                clientId,
+                estimateId: null,
+                items,
+                subtotal: Math.round(subtotal * 100) / 100,
+                taxRate: SALES_TAX_RATE,
+                taxAmount: Math.round(taxAmount * 100) / 100,
+                total: Math.round(total * 100) / 100,
+                createdAt: new Date().toISOString(),
+                dueDate,
+                status: 'draft'
+            };
             const invoiceId = await addInvoice(invoice);
             await generatePDF(invoice, invoiceId);
             e.target.reset();
@@ -616,16 +653,50 @@
                 alert('Client has no phone number on file.');
                 return;
             }
-            const message = `Invoice from Owensboro Mowing Company\nAmount: $${invoice.total.toFixed(2)}\nItems: ${invoice.items.length}\nDate: ${new Date(invoice.createdAt).toLocaleDateString()}`;
-            const smsURL = `sms:${client.phone}?body=${encodeURIComponent(message)}`;
-            window.location.href = smsURL;
-        }
 
-        async function generatePDF(invoice, invoiceId) {
+            // Generate PDF blob for sharing
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            const client = await getClient(invoice.clientId);
 
+            // Reuse PDF generation logic (generate the full PDF)
+            generatePDFDocument(doc, invoice, id, client);
+
+            // Create filename
+            const dateStr = new Date(invoice.createdAt).toISOString().split('T')[0];
+            const clientName = client ? client.name.replace(/[^a-z0-9]/gi, '_') : 'Client';
+            const filename = `Invoice_${String(id).padStart(4, '0')}_${clientName}_${dateStr}.pdf`;
+
+            // Get PDF as blob
+            const pdfBlob = doc.output('blob');
+
+            // Check if Web Share API is supported and can share files
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([pdfBlob], filename, { type: 'application/pdf' })] })) {
+                try {
+                    const file = new File([pdfBlob], filename, { type: 'application/pdf' });
+                    await navigator.share({
+                        title: `Invoice for ${client.name}`,
+                        text: `Invoice from Owensboro Mowing Company\nAmount: $${invoice.total.toFixed(2)}\nDate: ${new Date(invoice.createdAt).toLocaleDateString()}`,
+                        files: [file]
+                    });
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        console.error('Error sharing:', err);
+                        alert('Failed to share PDF. The file has been generated - you can view it using the "View PDF" button.');
+                    }
+                }
+            } else {
+                // Fallback: Download PDF and open SMS with text message
+                doc.save(filename);
+                const message = `Invoice from Owensboro Mowing Company\nAmount: $${invoice.total.toFixed(2)}\nItems: ${invoice.items.length}\nDate: ${new Date(invoice.createdAt).toLocaleDateString()}\n\nPDF has been downloaded. Please attach it to your message.`;
+                const smsURL = `sms:${client.phone}?body=${encodeURIComponent(message)}`;
+                setTimeout(() => {
+                    window.location.href = smsURL;
+                }, 500);
+            }
+        }
+
+        // Helper function to generate PDF document content
+        function generatePDFDocument(doc, invoice, invoiceId, client) {
             // Colors
             const primaryColor = [90, 90, 90]; // #5a5a5a
             const accentColor = [16, 185, 129]; // Green accent
@@ -820,13 +891,17 @@
             // Subtotal
             doc.setFontSize(10);
             doc.setFont(undefined, 'normal');
+            const subtotal = invoice.subtotal || invoice.total || 0;
+            const taxRate = invoice.taxRate || 0;
+            const taxAmount = invoice.taxAmount || 0;
             doc.text('Subtotal:', totalsX, y);
-            doc.text(`$${invoice.total.toFixed(2)}`, 190, y, { align: 'right' });
+            doc.text(`$${subtotal.toFixed(2)}`, 190, y, { align: 'right' });
             y += 6;
 
-            // Tax (0% for lawn services typically)
-            doc.text('Sales Tax (0%):', totalsX, y);
-            doc.text('$0.00', 190, y, { align: 'right' });
+            // Sales Tax
+            const taxPercentage = (taxRate * 100).toFixed(1);
+            doc.text(`Sales Tax (${taxPercentage}%):`, totalsX, y);
+            doc.text(`$${taxAmount.toFixed(2)}`, 190, y, { align: 'right' });
             y += 8;
 
             // Grand Total - highlighted box
@@ -900,6 +975,17 @@
             doc.setTextColor(100, 100, 100);
             doc.text('This invoice was generated electronically and is valid without a signature.', 105, 285, { align: 'center' });
 
+            // PDF generation complete (no save - caller decides what to do with doc)
+        }
+
+        async function generatePDF(invoice, invoiceId) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const client = await getClient(invoice.clientId);
+
+            // Generate PDF content
+            generatePDFDocument(doc, invoice, invoiceId, client);
+
             // Save with better filename
             const dateStr = new Date(invoice.createdAt).toISOString().split('T')[0];
             const clientName = client ? client.name.replace(/[^a-z0-9]/gi, '_') : 'Client';
@@ -965,6 +1051,8 @@
             loadClientSelect('invoice');
             addEstimateItem();
             addLineItem();
+            // Update tax rate display in settings
+            document.getElementById('current-tax-rate').textContent = (SALES_TAX_RATE * 100).toFixed(1);
         }
 
         window.addEventListener('load', initApp);

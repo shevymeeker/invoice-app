@@ -4,16 +4,28 @@
 
 import { performTransaction, generateId } from './db';
 import { STORES, STATUS } from './schema';
+import { BUSINESS_INFO } from '../config/business.js';
 
 /**
- * Calculate total from items array
+ * Calculate invoice totals including tax
  * @param {Array} items - Array of items with quantity and price
- * @returns {number} Total amount
+ * @returns {Object} Object with subtotal, taxRate, taxAmount, and total
  */
-const calculateTotal = (items) => {
-  return items.reduce((sum, item) => {
+const calculateInvoiceTotals = (items) => {
+  const subtotal = items.reduce((sum, item) => {
     return sum + (item.quantity * item.price);
   }, 0);
+
+  const taxRate = BUSINESS_INFO.salesTaxRate || 0;
+  const taxAmount = subtotal * taxRate;
+  const total = subtotal + taxAmount;
+
+  return {
+    subtotal: Math.round(subtotal * 100) / 100,
+    taxRate,
+    taxAmount: Math.round(taxAmount * 100) / 100,
+    total: Math.round(total * 100) / 100,
+  };
 };
 
 /**
@@ -34,12 +46,17 @@ export const createInvoice = async (invoiceData) => {
     throw new Error('items array is required');
   }
 
+  const totals = calculateInvoiceTotals(invoiceData.items);
+
   const invoice = {
     invoiceId: generateId(),
     clientId: invoiceData.clientId,
     estimateId: invoiceData.estimateId || null,
     items: invoiceData.items,
-    total: calculateTotal(invoiceData.items),
+    subtotal: totals.subtotal,
+    taxRate: totals.taxRate,
+    taxAmount: totals.taxAmount,
+    total: totals.total,
     createdAt: Date.now(),
     status: invoiceData.status || STATUS.INVOICE.DRAFT,
   };
@@ -92,9 +109,13 @@ export const updateInvoice = async (invoiceId, updates) => {
     createdAt: invoice.createdAt, // Preserve creation date
   };
 
-  // Recalculate total if items were updated
+  // Recalculate totals if items were updated
   if (updates.items) {
-    updatedInvoice.total = calculateTotal(updates.items);
+    const totals = calculateInvoiceTotals(updates.items);
+    updatedInvoice.subtotal = totals.subtotal;
+    updatedInvoice.taxRate = totals.taxRate;
+    updatedInvoice.taxAmount = totals.taxAmount;
+    updatedInvoice.total = totals.total;
   }
 
   await performTransaction(STORES.INVOICES, 'readwrite', (store) => {
